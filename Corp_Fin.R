@@ -212,15 +212,95 @@ ggsave("debt_rev_Segment.png", debt_rev_Segment$plot, width = 10, height = 6, dp
 # write.csv(intang_assets_Segment$data, "intang_assets_Segment.csv")
 # ggsave("intang_assets_Segment.png", intang_assets_Segment$plot, width = 10, height = 6, dpi = 300)
 
-# # Fixed Effects Model - Has Financialization Reduced Fixed Capital Investment?
-# 
-# sample_input <- fundamentals %>%
-#   mutate(fir = Capital.Expenditures...Total / Total.Assets) %>%
-#   mutate(fin = Cash...Short.Term.Investments / Total.Assets) %>%
-#   mutate(svo = Cash.Dividends.Paid...Common.Stock.Buyback...Net / Shareholders.Equity...Common) %>%
-#   mutate(dtr = (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Revenue.from.Business.Activities...Total) %>%
-#   select(Date, Symbol, fir, fin, svo, dtr)
-# 
-# reg = lm(fir ~ fin + svo + dtr, data = sample_input)
-# summary(reg)
+# 4. Arellano-Bond Difference GMM Estimation
+# Following Davis (2018, Metroeconomica) and Jibril et al. / Tori & Onaran (2022, CJE)
+#
+# Model: (I/K)_it = a1*(I/K)_{i,t-1} + a2*sales_{i,t-1} + a3*profit_{i,t-1}
+#                  + a4*fin_{i,t-1} + a5*svo_{i,t-1} + a6*dtr_{i,t-1}
+#                  + firm_FE + time_FE + e_it
+#
+# The Arellano-Bond estimator first-differences to remove firm fixed effects,
+# then uses lagged levels (t-2 and deeper) as instruments for the endogenous
+# differenced regressors.
+
+# 4.1 Construct panel variables
+
+panel_data <- fundamentals %>%
+  mutate(
+    Year = year(Date),
+    # Dependent variable: Fixed investment rate (capex / total assets)
+    fir = Capital.Expenditures...Total / Total.Assets,
+    # Financialization measure 1: Financial assets ratio
+    fin = (Cash...Short.Term.Investments + Loans...Receivables...Total) / Total.Assets,
+    # Financialization measure 2: Shareholder payouts to equity
+    svo = Cash.Dividends.Paid...Common.Stock.Buyback...Net / Shareholders.Equity...Common,
+    # Financialization measure 3: Debt to revenue
+    dtr = (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Revenue.from.Business.Activities...Total,
+    # Control: Sales growth (log change in revenue) - demand proxy
+    log_rev = log(Revenue.from.Business.Activities...Total),
+    # Control: Profit rate (net income / total assets)
+    profit = Net.Income.after.Minority.Interest / Total.Assets
+  ) %>%
+  select(Symbol, Year, fir, fin, svo, dtr, log_rev, profit) %>%
+  filter(is.finite(fir), is.finite(fin), is.finite(svo), is.finite(dtr),
+         is.finite(log_rev), is.finite(profit))
+
+# Convert to pdata.frame (panel data frame required by plm)
+pdata <- pdata.frame(panel_data, index = c("Symbol", "Year"))
+
+# 4.2 Difference GMM (Arellano-Bond) estimation
+#
+# Formula structure for pgmm:
+#   response ~ lagged DV + covariates | GMM instruments
+#
+# - The dependent variable and financialization measures are treated as
+#   endogenous (instrumented with lags 2+)
+# - log_rev and profit are controls for demand and profitability
+# - transformation = "d" specifies difference GMM (Arellano-Bond)
+# - effect = "twoways" includes time dummies
+# - model = "twosteps" gives the efficient two-step estimator
+
+# Model 1: Baseline with all three financialization measures
+gmm_model <- pgmm(
+  fir ~ lag(fir, 1) + lag(fin, 1) + lag(svo, 1) + lag(dtr, 1)
+      + lag(log_rev, 1) + lag(profit, 1)
+  | lag(fir, 2:99) + lag(fin, 2:99) + lag(svo, 2:99) + lag(dtr, 2:99),
+  data = pdata,
+  effect = "twoways",
+  model = "twosteps",
+  transformation = "d"
+)
+
+summary(gmm_model, robust = TRUE)
+
+# 4.3 Diagnostic tests
+
+# Sargan/Hansen test of overidentifying restrictions
+# H0: instruments are valid. A p-value > 0.05 means instruments are acceptable.
+sargan(gmm_model)
+
+# Arellano-Bond test for serial correlation
+# AR(1) in differences should be significant (expected by construction)
+# AR(2) in differences should be INsignificant (validates moment conditions)
+mtest(gmm_model, order = 1)  # AR(1) - expect significant
+mtest(gmm_model, order = 2)  # AR(2) - expect insignificant (p > 0.05)
+
+# 4.4 Alternative: One-step estimator (more robust standard errors)
+gmm_onestep <- pgmm(
+  fir ~ lag(fir, 1) + lag(fin, 1) + lag(svo, 1) + lag(dtr, 1)
+      + lag(log_rev, 1) + lag(profit, 1)
+  | lag(fir, 2:99) + lag(fin, 2:99) + lag(svo, 2:99) + lag(dtr, 2:99),
+  data = pdata,
+  effect = "twoways",
+  model = "onestep",
+  transformation = "d"
+)
+
+summary(gmm_onestep, robust = TRUE)
+
+# 4.5 Output results with modelsummary
+modelsummary(
+  list("Two-Step GMM" = gmm_model, "One-Step GMM" = gmm_onestep),
+  output = "gmm_results.txt"
+)
 
