@@ -213,15 +213,17 @@ ggsave("debt_rev_Segment.png", debt_rev_Segment$plot, width = 10, height = 6, dp
 # ggsave("intang_assets_Segment.png", intang_assets_Segment$plot, width = 10, height = 6, dpi = 300)
 
 # 4. Arellano-Bond Difference GMM Estimation
-# Following Davis (2018, Metroeconomica) and Jibril et al. / Tori & Onaran (2022, CJE)
+# Following Orhangazi (2008, CJE), Davis (2018, Metroeconomica),
+# Tori & Onaran (2020, SER), and Jibril et al.
 #
-# Model: (I/K)_it = a1*(I/K)_{i,t-1} + a2*sales_{i,t-1} + a3*profit_{i,t-1}
-#                  + a4*fin_{i,t-1} + a5*svo_{i,t-1} + a6*dtr_{i,t-1}
+# Model: (I/K)_it = a1*(I/K)_{i,t-1} + a2*(S/K)_it + a3*(pi/K)_it
+#                  + a4*fin_it + a5*svo_it + a6*dtr_it
 #                  + firm_FE + time_FE + e_it
 #
 # The Arellano-Bond estimator first-differences to remove firm fixed effects,
 # then uses lagged levels (t-2 and deeper) as instruments for the endogenous
-# differenced regressors.
+# differenced regressors. All RHS variables are treated as endogenous
+# following Orhangazi (2008) and Tori & Onaran (2020).
 
 # 4.1 Construct panel variables
 
@@ -236,71 +238,150 @@ panel_data <- fundamentals %>%
     svo = Cash.Dividends.Paid...Common.Stock.Buyback...Net / Shareholders.Equity...Common,
     # Financialization measure 3: Debt to revenue
     dtr = (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Revenue.from.Business.Activities...Total,
-    # Control: Sales growth (log change in revenue) - demand proxy
-    log_rev = log(Revenue.from.Business.Activities...Total),
+    # Control: Revenue / total assets (demand proxy, as in Orhangazi 2008)
+    sales = Revenue.from.Business.Activities...Total / Total.Assets,
     # Control: Profit rate (net income / total assets)
     profit = Net.Income.after.Minority.Interest / Total.Assets
   ) %>%
-  select(Symbol, Year, fir, fin, svo, dtr, log_rev, profit) %>%
+  select(Symbol, Year, fir, fin, svo, dtr, sales, profit) %>%
   filter(is.finite(fir), is.finite(fin), is.finite(svo), is.finite(dtr),
-         is.finite(log_rev), is.finite(profit))
+         is.finite(sales), is.finite(profit))
 
 # Convert to pdata.frame (panel data frame required by plm)
 pdata <- pdata.frame(panel_data, index = c("Symbol", "Year"))
 
-# 4.2 Difference GMM (Arellano-Bond) estimation
-#
-# Formula structure for pgmm:
-#   response ~ lagged DV + covariates | GMM instruments
-#
-# - The dependent variable and financialization measures are treated as
-#   endogenous (instrumented with lags 2+)
-# - log_rev and profit are controls for demand and profitability
-# - transformation = "d" specifies difference GMM (Arellano-Bond)
-# - effect = "twoways" includes time dummies
-# - model = "twosteps" gives the efficient two-step estimator
+# ============================================================================
+# 4.2 VERSION A: Levels / Ratios Specification
+# ============================================================================
+# Following Orhangazi (2008) and Tori & Onaran (2020):
+# - Contemporaneous regressors (not lagged) on the RHS
+# - All RHS variables treated as endogenous (GMM-instrumented with lags 2+)
+# - Two-way effects (firm FE removed by differencing, time dummies included)
+# - Two-step estimator with Windmeijer-corrected robust SEs
 
-# Model 1: Baseline with all three financialization measures
-gmm_model <- pgmm(
-  fir ~ lag(fir, 1) + lag(fin, 1) + lag(svo, 1) + lag(dtr, 1)
-      + lag(log_rev, 1) + lag(profit, 1)
-  | lag(fir, 2:99) + lag(fin, 2:99) + lag(svo, 2:99) + lag(dtr, 2:99),
+# Two-step difference GMM
+gmm_levels_2s <- pgmm(
+  fir ~ lag(fir, 1) + fin + svo + dtr + sales + profit
+  | lag(fir, 2:99) + lag(fin, 2:99) + lag(svo, 2:99) + lag(dtr, 2:99)
+    + lag(sales, 2:99) + lag(profit, 2:99),
   data = pdata,
   effect = "twoways",
   model = "twosteps",
   transformation = "d"
 )
 
-summary(gmm_model, robust = TRUE)
+summary(gmm_levels_2s, robust = TRUE)
 
-# 4.3 Diagnostic tests
-
-# Sargan/Hansen test of overidentifying restrictions
-# H0: instruments are valid. A p-value > 0.05 means instruments are acceptable.
-sargan(gmm_model)
-
-# Arellano-Bond test for serial correlation
-# AR(1) in differences should be significant (expected by construction)
-# AR(2) in differences should be INsignificant (validates moment conditions)
-mtest(gmm_model, order = 1)  # AR(1) - expect significant
-mtest(gmm_model, order = 2)  # AR(2) - expect insignificant (p > 0.05)
-
-# 4.4 Alternative: One-step estimator (more robust standard errors)
-gmm_onestep <- pgmm(
-  fir ~ lag(fir, 1) + lag(fin, 1) + lag(svo, 1) + lag(dtr, 1)
-      + lag(log_rev, 1) + lag(profit, 1)
-  | lag(fir, 2:99) + lag(fin, 2:99) + lag(svo, 2:99) + lag(dtr, 2:99),
+# One-step difference GMM (more reliable SEs without Windmeijer correction)
+gmm_levels_1s <- pgmm(
+  fir ~ lag(fir, 1) + fin + svo + dtr + sales + profit
+  | lag(fir, 2:99) + lag(fin, 2:99) + lag(svo, 2:99) + lag(dtr, 2:99)
+    + lag(sales, 2:99) + lag(profit, 2:99),
   data = pdata,
   effect = "twoways",
   model = "onestep",
   transformation = "d"
 )
 
-summary(gmm_onestep, robust = TRUE)
+summary(gmm_levels_1s, robust = TRUE)
 
-# 4.5 Output results with modelsummary
+# Diagnostic tests - Levels specification
+cat("\n=== DIAGNOSTICS: Levels Specification (Two-Step) ===\n")
+
+# Sargan test: H0 = instruments are valid. Want p > 0.05 (do NOT reject).
+cat("\nSargan test of overidentifying restrictions:\n")
+print(sargan(gmm_levels_2s))
+
+# AR(1): Should be significant (expected by construction of first-differencing).
+# AR(2): Must be INsignificant (p > 0.05) to validate moment conditions.
+cat("\nArellano-Bond AR(1) test:\n")
+print(mtest(gmm_levels_2s, order = 1))
+cat("\nArellano-Bond AR(2) test:\n")
+print(mtest(gmm_levels_2s, order = 2))
+
+# ============================================================================
+# 4.3 VERSION B: Log Specification
+# ============================================================================
+# Uses inverse hyperbolic sine (asinh) transformation instead of natural log.
+# asinh(x) = log(x + sqrt(x^2 + 1)), which approximates log(2|x|) for large
+# |x| but is defined for zero and negative values -- essential since svo
+# (shareholder payouts) can be negative or zero.
+# This is a standard approach in the financialization literature when variables
+# can take non-positive values (see Burbidge, Magee & Robb 1988).
+
+panel_data_log <- fundamentals %>%
+  mutate(
+    Year = year(Date),
+    fir = Capital.Expenditures...Total / Total.Assets,
+    fin = (Cash...Short.Term.Investments + Loans...Receivables...Total) / Total.Assets,
+    svo = Cash.Dividends.Paid...Common.Stock.Buyback...Net / Shareholders.Equity...Common,
+    dtr = (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Revenue.from.Business.Activities...Total,
+    sales = Revenue.from.Business.Activities...Total / Total.Assets,
+    profit = Net.Income.after.Minority.Interest / Total.Assets
+  ) %>%
+  # Apply asinh transformation to all variables
+  mutate(
+    fir = asinh(fir),
+    fin = asinh(fin),
+    svo = asinh(svo),
+    dtr = asinh(dtr),
+    sales = asinh(sales),
+    profit = asinh(profit)
+  ) %>%
+  select(Symbol, Year, fir, fin, svo, dtr, sales, profit) %>%
+  filter(is.finite(fir), is.finite(fin), is.finite(svo), is.finite(dtr),
+         is.finite(sales), is.finite(profit))
+
+pdata_log <- pdata.frame(panel_data_log, index = c("Symbol", "Year"))
+
+# Two-step difference GMM (log specification)
+gmm_log_2s <- pgmm(
+  fir ~ lag(fir, 1) + fin + svo + dtr + sales + profit
+  | lag(fir, 2:99) + lag(fin, 2:99) + lag(svo, 2:99) + lag(dtr, 2:99)
+    + lag(sales, 2:99) + lag(profit, 2:99),
+  data = pdata_log,
+  effect = "twoways",
+  model = "twosteps",
+  transformation = "d"
+)
+
+summary(gmm_log_2s, robust = TRUE)
+
+# One-step difference GMM (log specification)
+gmm_log_1s <- pgmm(
+  fir ~ lag(fir, 1) + fin + svo + dtr + sales + profit
+  | lag(fir, 2:99) + lag(fin, 2:99) + lag(svo, 2:99) + lag(dtr, 2:99)
+    + lag(sales, 2:99) + lag(profit, 2:99),
+  data = pdata_log,
+  effect = "twoways",
+  model = "onestep",
+  transformation = "d"
+)
+
+summary(gmm_log_1s, robust = TRUE)
+
+# Diagnostic tests - Log specification
+cat("\n=== DIAGNOSTICS: Log (asinh) Specification (Two-Step) ===\n")
+
+cat("\nSargan test of overidentifying restrictions:\n")
+print(sargan(gmm_log_2s))
+
+cat("\nArellano-Bond AR(1) test:\n")
+print(mtest(gmm_log_2s, order = 1))
+cat("\nArellano-Bond AR(2) test:\n")
+print(mtest(gmm_log_2s, order = 2))
+
+# ============================================================================
+# 4.4 Output results
+# ============================================================================
+
 modelsummary(
-  list("Two-Step GMM" = gmm_model, "One-Step GMM" = gmm_onestep),
+  list(
+    "Levels (2-step)" = gmm_levels_2s,
+    "Levels (1-step)" = gmm_levels_1s,
+    "Log (2-step)" = gmm_log_2s,
+    "Log (1-step)" = gmm_log_1s
+  ),
   output = "gmm_results.txt"
 )
 
