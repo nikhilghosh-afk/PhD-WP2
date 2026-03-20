@@ -216,22 +216,23 @@ ggsave("debt_rev_Segment.png", debt_rev_Segment$plot, width = 10, height = 6, dp
 # Following Orhangazi (2008, CJE), Davis (2018, Metroeconomica),
 # Tori & Onaran (2020, SER), and Jibril et al.
 #
-# Model: (I/K)_it = a1*(I/K)_{i,t-1} + a2*(S/K)_it + a3*(pi/K)_it
-#                  + a4*fin_it + a5*svo_it + a6*dtr_it
-#                  + firm_FE + time_FE + e_it
+# Model: log(CapEx)_it = a1*log(CapEx)_{i,t-1} + a2*fin_it + a3*svo_it
+#                       + a4*dtr_it + a5*sales_it + a6*profit_it
+#                       + firm_FE + time_FE + e_it
 #
 # The Arellano-Bond estimator first-differences to remove firm fixed effects,
 # then uses lagged levels (t-2 and deeper) as instruments for the endogenous
 # differenced regressors. All RHS variables are treated as endogenous
 # following Orhangazi (2008) and Tori & Onaran (2020).
+# Two-step estimator with Windmeijer-corrected robust SEs throughout.
 
 # 4.1 Construct panel variables
 
 panel_data <- fundamentals %>%
   mutate(
     Year = year(Date),
-    # Dependent variable: Fixed investment rate (capex / total assets)
-    fir = Capital.Expenditures...Total / Total.Assets,
+    # Dependent variable: log(Capital Expenditures)
+    log_capex = log(Capital.Expenditures...Total),
     # Financialization measure 1: Financial assets ratio
     fin = (Cash...Short.Term.Investments + Loans...Receivables...Total) / Total.Assets,
     # Financialization measure 2: Shareholder payouts to equity
@@ -243,26 +244,25 @@ panel_data <- fundamentals %>%
     # Control: Profit rate (net income / total assets)
     profit = Net.Income.after.Minority.Interest / Total.Assets
   ) %>%
-  select(Symbol, Year, fir, fin, svo, dtr, sales, profit) %>%
-  filter(is.finite(fir), is.finite(fin), is.finite(svo), is.finite(dtr),
+  select(Symbol, Year, log_capex, fin, svo, dtr, sales, profit) %>%
+  filter(is.finite(log_capex), is.finite(fin), is.finite(svo), is.finite(dtr),
          is.finite(sales), is.finite(profit))
 
 # Convert to pdata.frame (panel data frame required by plm)
 pdata <- pdata.frame(panel_data, index = c("Symbol", "Year"))
 
 # ============================================================================
-# 4.2 VERSION A: Levels / Ratios Specification
+# 4.2 VERSION A: Levels / Ratios Specification (RHS variables as ratios)
 # ============================================================================
-# Following Orhangazi (2008) and Tori & Onaran (2020):
-# - Contemporaneous regressors (not lagged) on the RHS
+# - Dependent variable: log(CapEx)
+# - RHS financialization & control variables enter as ratios
 # - All RHS variables treated as endogenous (GMM-instrumented with lags 2+)
 # - Two-way effects (firm FE removed by differencing, time dummies included)
 # - Two-step estimator with Windmeijer-corrected robust SEs
 
-# Two-step difference GMM
-gmm_levels_2s <- pgmm(
-  fir ~ lag(fir, 1) + fin + svo + dtr + sales + profit
-  | lag(fir, 2:99) + lag(fin, 2:99) + lag(svo, 2:99) + lag(dtr, 2:99)
+gmm_levels <- pgmm(
+  log_capex ~ lag(log_capex, 1) + fin + svo + dtr + sales + profit
+  | lag(log_capex, 2:99) + lag(fin, 2:99) + lag(svo, 2:99) + lag(dtr, 2:99)
     + lag(sales, 2:99) + lag(profit, 2:99),
   data = pdata,
   effect = "twoways",
@@ -270,74 +270,52 @@ gmm_levels_2s <- pgmm(
   transformation = "d"
 )
 
-summary(gmm_levels_2s, robust = TRUE)
-
-# One-step difference GMM (more reliable SEs without Windmeijer correction)
-gmm_levels_1s <- pgmm(
-  fir ~ lag(fir, 1) + fin + svo + dtr + sales + profit
-  | lag(fir, 2:99) + lag(fin, 2:99) + lag(svo, 2:99) + lag(dtr, 2:99)
-    + lag(sales, 2:99) + lag(profit, 2:99),
-  data = pdata,
-  effect = "twoways",
-  model = "onestep",
-  transformation = "d"
-)
-
-summary(gmm_levels_1s, robust = TRUE)
+summary(gmm_levels, robust = TRUE)
 
 # Diagnostic tests - Levels specification
 cat("\n=== DIAGNOSTICS: Levels Specification (Two-Step) ===\n")
 
 # Sargan test: H0 = instruments are valid. Want p > 0.05 (do NOT reject).
 cat("\nSargan test of overidentifying restrictions:\n")
-print(sargan(gmm_levels_2s))
+print(sargan(gmm_levels))
 
 # AR(1): Should be significant (expected by construction of first-differencing).
 # AR(2): Must be INsignificant (p > 0.05) to validate moment conditions.
 cat("\nArellano-Bond AR(1) test:\n")
-print(mtest(gmm_levels_2s, order = 1))
+print(mtest(gmm_levels, order = 1))
 cat("\nArellano-Bond AR(2) test:\n")
-print(mtest(gmm_levels_2s, order = 2))
+print(mtest(gmm_levels, order = 2))
 
 # ============================================================================
-# 4.3 VERSION B: Log Specification
+# 4.3 VERSION B: Log Specification (RHS variables also transformed)
 # ============================================================================
-# Uses inverse hyperbolic sine (asinh) transformation instead of natural log.
+# Uses inverse hyperbolic sine (asinh) transformation for RHS variables.
 # asinh(x) = log(x + sqrt(x^2 + 1)), which approximates log(2|x|) for large
 # |x| but is defined for zero and negative values -- essential since svo
 # (shareholder payouts) can be negative or zero.
-# This is a standard approach in the financialization literature when variables
-# can take non-positive values (see Burbidge, Magee & Robb 1988).
+# (See Burbidge, Magee & Robb 1988).
 
 panel_data_log <- fundamentals %>%
   mutate(
     Year = year(Date),
-    fir = Capital.Expenditures...Total / Total.Assets,
-    fin = (Cash...Short.Term.Investments + Loans...Receivables...Total) / Total.Assets,
-    svo = Cash.Dividends.Paid...Common.Stock.Buyback...Net / Shareholders.Equity...Common,
-    dtr = (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Revenue.from.Business.Activities...Total,
-    sales = Revenue.from.Business.Activities...Total / Total.Assets,
-    profit = Net.Income.after.Minority.Interest / Total.Assets
+    # Dependent variable: log(Capital Expenditures) - natural log, same as Version A
+    log_capex = log(Capital.Expenditures...Total),
+    # RHS variables: asinh-transformed to handle zeros/negatives
+    fin = asinh((Cash...Short.Term.Investments + Loans...Receivables...Total) / Total.Assets),
+    svo = asinh(Cash.Dividends.Paid...Common.Stock.Buyback...Net / Shareholders.Equity...Common),
+    dtr = asinh((Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Revenue.from.Business.Activities...Total),
+    sales = asinh(Revenue.from.Business.Activities...Total / Total.Assets),
+    profit = asinh(Net.Income.after.Minority.Interest / Total.Assets)
   ) %>%
-  # Apply asinh transformation to all variables
-  mutate(
-    fir = asinh(fir),
-    fin = asinh(fin),
-    svo = asinh(svo),
-    dtr = asinh(dtr),
-    sales = asinh(sales),
-    profit = asinh(profit)
-  ) %>%
-  select(Symbol, Year, fir, fin, svo, dtr, sales, profit) %>%
-  filter(is.finite(fir), is.finite(fin), is.finite(svo), is.finite(dtr),
+  select(Symbol, Year, log_capex, fin, svo, dtr, sales, profit) %>%
+  filter(is.finite(log_capex), is.finite(fin), is.finite(svo), is.finite(dtr),
          is.finite(sales), is.finite(profit))
 
 pdata_log <- pdata.frame(panel_data_log, index = c("Symbol", "Year"))
 
-# Two-step difference GMM (log specification)
-gmm_log_2s <- pgmm(
-  fir ~ lag(fir, 1) + fin + svo + dtr + sales + profit
-  | lag(fir, 2:99) + lag(fin, 2:99) + lag(svo, 2:99) + lag(dtr, 2:99)
+gmm_log <- pgmm(
+  log_capex ~ lag(log_capex, 1) + fin + svo + dtr + sales + profit
+  | lag(log_capex, 2:99) + lag(fin, 2:99) + lag(svo, 2:99) + lag(dtr, 2:99)
     + lag(sales, 2:99) + lag(profit, 2:99),
   data = pdata_log,
   effect = "twoways",
@@ -345,31 +323,18 @@ gmm_log_2s <- pgmm(
   transformation = "d"
 )
 
-summary(gmm_log_2s, robust = TRUE)
-
-# One-step difference GMM (log specification)
-gmm_log_1s <- pgmm(
-  fir ~ lag(fir, 1) + fin + svo + dtr + sales + profit
-  | lag(fir, 2:99) + lag(fin, 2:99) + lag(svo, 2:99) + lag(dtr, 2:99)
-    + lag(sales, 2:99) + lag(profit, 2:99),
-  data = pdata_log,
-  effect = "twoways",
-  model = "onestep",
-  transformation = "d"
-)
-
-summary(gmm_log_1s, robust = TRUE)
+summary(gmm_log, robust = TRUE)
 
 # Diagnostic tests - Log specification
 cat("\n=== DIAGNOSTICS: Log (asinh) Specification (Two-Step) ===\n")
 
 cat("\nSargan test of overidentifying restrictions:\n")
-print(sargan(gmm_log_2s))
+print(sargan(gmm_log))
 
 cat("\nArellano-Bond AR(1) test:\n")
-print(mtest(gmm_log_2s, order = 1))
+print(mtest(gmm_log, order = 1))
 cat("\nArellano-Bond AR(2) test:\n")
-print(mtest(gmm_log_2s, order = 2))
+print(mtest(gmm_log, order = 2))
 
 # ============================================================================
 # 4.4 Output results
@@ -377,10 +342,8 @@ print(mtest(gmm_log_2s, order = 2))
 
 modelsummary(
   list(
-    "Levels (2-step)" = gmm_levels_2s,
-    "Levels (1-step)" = gmm_levels_1s,
-    "Log (2-step)" = gmm_log_2s,
-    "Log (1-step)" = gmm_log_1s
+    "Levels RHS" = gmm_levels,
+    "Log RHS" = gmm_log
   ),
   output = "gmm_results.txt"
 )
