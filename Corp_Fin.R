@@ -213,18 +213,19 @@ ggsave("debt_rev_Segment.png", debt_rev_Segment$plot, width = 10, height = 6, dp
 # ggsave("intang_assets_Segment.png", intang_assets_Segment$plot, width = 10, height = 6, dpi = 300)
 
 # 4. Arellano-Bond Difference GMM Estimation
-# Following Orhangazi (2008, CJE), Davis (2018, Metroeconomica),
-# Tori & Onaran (2020, SER), and Jibril et al.
+# Following Jibril, Kaltenbrunner & Kesidou (2018, FMM WP No.27),
+# Orhangazi (2008, CJE), Davis (2018, Metroeconomica), Tori & Onaran (2020, SER).
 #
-# Model: log(CapEx)_it = a1*log(CapEx)_{i,t-1} + a2*fin_it + a3*svo_it
-#                       + a4*dtr_it + a5*sales_it + a6*profit_it
+# Model: log(CapEx)_it = a1*log(CapEx)_{i,t-1} + a2*fin_{i,t-1} + a3*svo_{i,t-1}
+#                       + a4*dtr_{i,t-1} + a5*log(TA)_{i,t-1}
 #                       + firm_FE + time_FE + e_it
 #
-# The Arellano-Bond estimator first-differences to remove firm fixed effects,
-# then uses lagged levels (t-2 and deeper) as instruments for the endogenous
-# differenced regressors. All RHS variables are treated as endogenous
-# following Orhangazi (2008) and Tori & Onaran (2020).
-# Two-step estimator with Windmeijer-corrected robust SEs throughout.
+# Following Jibril et al. (2018):
+# - All RHS variables enter with a one-period lag
+# - Instruments: lagged levels (t-2 to t-4) to limit instrument proliferation
+# - Control variable: log(Total Assets) as firm-size proxy
+# - Two-step estimator with Windmeijer (2005) corrected robust SEs
+# - Time dummies to guard against cross-section correlation
 
 # 4.1 Construct panel variables
 
@@ -233,37 +234,35 @@ panel_data <- fundamentals %>%
     Year = year(Date),
     # Dependent variable: log(Capital Expenditures)
     log_capex = log(Capital.Expenditures...Total),
-    # Financialization measure 1: Financial assets ratio
+    # Financialization measure 1: Financial assets ratio (crowding-out)
     fin = (Cash...Short.Term.Investments + Loans...Receivables...Total) / Total.Assets,
-    # Financialization measure 2: Shareholder payouts to equity
+    # Financialization measure 2: Shareholder payouts to equity (shareholder-value)
     svo = Cash.Dividends.Paid...Common.Stock.Buyback...Net / Shareholders.Equity...Common,
-    # Financialization measure 3: Debt to revenue
+    # Financialization measure 3: Debt to revenue (debt-trap)
     dtr = (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Revenue.from.Business.Activities...Total,
-    # Control: Revenue / total assets (demand proxy, as in Orhangazi 2008)
-    sales = Revenue.from.Business.Activities...Total / Total.Assets,
-    # Control: Profit rate (net income / total assets)
-    profit = Net.Income.after.Minority.Interest / Total.Assets
+    # Control: log(Total Assets) as firm-size proxy (Jibril et al. 2018)
+    log_ta = log(Total.Assets)
   ) %>%
-  select(Symbol, Year, log_capex, fin, svo, dtr, sales, profit) %>%
+  select(Symbol, Year, log_capex, fin, svo, dtr, log_ta) %>%
   filter(is.finite(log_capex), is.finite(fin), is.finite(svo), is.finite(dtr),
-         is.finite(sales), is.finite(profit))
+         is.finite(log_ta))
 
 # Convert to pdata.frame (panel data frame required by plm)
 pdata <- pdata.frame(panel_data, index = c("Symbol", "Year"))
 
 # ============================================================================
-# 4.2 VERSION A: Levels / Ratios Specification (RHS variables as ratios)
+# 4.2 Two-step Difference GMM (Jibril et al. 2018 approach)
 # ============================================================================
 # - Dependent variable: log(CapEx)
-# - RHS financialization & control variables enter as ratios
-# - All RHS variables treated as endogenous (GMM-instrumented with lags 2+)
+# - All RHS variables lagged one period (predetermined)
+# - Instruments: lagged levels t-2 to t-4 (limits instrument proliferation)
 # - Two-way effects (firm FE removed by differencing, time dummies included)
-# - Two-step estimator with Windmeijer-corrected robust SEs
+# - Two-step estimator with Windmeijer (2005) corrected robust SEs
 
 gmm_levels <- pgmm(
-  log_capex ~ lag(log_capex, 1) + fin + svo + dtr + sales + profit
-  | lag(log_capex, 2:99) + lag(fin, 2:99) + lag(svo, 2:99) + lag(dtr, 2:99)
-    + lag(sales, 2:99) + lag(profit, 2:99),
+  log_capex ~ lag(log_capex, 1) + lag(fin, 1) + lag(svo, 1) + lag(dtr, 1) + lag(log_ta, 1)
+  | lag(log_capex, 2:4) + lag(fin, 2:4) + lag(svo, 2:4) + lag(dtr, 2:4)
+    + lag(log_ta, 2:4),
   data = pdata,
   effect = "twoways",
   model = "twosteps",
