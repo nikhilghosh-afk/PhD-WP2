@@ -125,23 +125,42 @@ calculate_metrics <- function(data, metric, group_var, y_label) {
     group_by({{group_var}}, Date) %>%
     summarise(a = mean({{metric}}, na.rm = TRUE), .groups = "drop")
   
- combined_df <- bind_rows(total_df, grouped_df) 
+ combined_df <- bind_rows(total_df, grouped_df)
+
+ # Build consistent aesthetics so "Total" always looks the same
+ group_col <- as.character(substitute(group_var))
+ group_levels <- sort(unique(combined_df[[group_col]]))
+ other_levels <- setdiff(group_levels, "Total")
+
+ set1_colours <- brewer.pal(max(3, length(other_levels)), "Set1")
+ colour_values <- setNames(
+   c("black", set1_colours[seq_along(other_levels)]),
+   c("Total", other_levels))
+ shape_values <- setNames(
+   c(16, 17:(16 + length(other_levels))),
+   c("Total", other_levels))
+ linetype_values <- setNames(
+   c("solid", rep("dashed", length(other_levels))),
+   c("Total", other_levels))
+
  plot <- combined_df %>%
-    ggplot(aes(x = Date, y = a, 
-               colour = {{group_var}}, 
-               shape = {{group_var}}, 
+    ggplot(aes(x = Date, y = a,
+               colour = {{group_var}},
+               shape = {{group_var}},
                linetype = {{group_var}})) +
     geom_line() +
     geom_point() +
     scale_x_date(breaks = scales::pretty_breaks(n = 10)) +
     scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) +
-    scale_colour_brewer(palette = "Set1") +
+    scale_colour_manual(values = colour_values) +
+    scale_shape_manual(values = shape_values) +
+    scale_linetype_manual(values = linetype_values) +
     labs(
       y = y_label,
       x = "Date",
-      colour = as.character(substitute(group_var)),
-      shape = as.character(substitute(group_var)),
-      linetype = as.character(substitute(group_var))
+      colour = group_col,
+      shape = group_col,
+      linetype = group_col
     ) +
     theme_minimal()
   
