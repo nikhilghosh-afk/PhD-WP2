@@ -216,14 +216,19 @@ ggsave("debt_rev_Segment.png", debt_rev_Segment$plot, width = 10, height = 6, dp
 # Following Jibril, Kaltenbrunner & Kesidou (2018, FMM WP No.27),
 # Orhangazi (2008, CJE), Davis (2018, Metroeconomica), Tori & Onaran (2020, SER).
 #
-# Model: log(CapEx)_it = a1*log(CapEx)_{i,t-1} + a2*fin_{i,t-1} + a3*svo_{i,t-1}
-#                       + a4*dtr_{i,t-1} + a5*log(TA)_{i,t-1}
-#                       + firm_FE + time_FE + e_it
+# Jibril et al. (2018) estimate SEPARATE models for each financialisation channel:
+#   Model 1 (crowding-out):        fin + fl_ta + log_ta
+#   Model 2 (shareholder-value):   fin + fl_ta + svo + log_ta
+#   Model 3 (debt-trap):           fin + fl_ta + dtr + log_ta
 #
-# Following Jibril et al. (2018):
+# All models include the lagged dependent variable (dynamic panel).
+# Adapted here with log(CapEx) as the dependent variable.
+#
+# Estimation details (following Jibril et al. 2018):
 # - All RHS variables enter with a one-period lag
 # - Instruments: lagged levels (t-2 to t-4) to limit instrument proliferation
 # - Control variable: log(Total Assets) as firm-size proxy
+# - FL/TA included as base variable in all models (Jibril et al. 2018)
 # - Two-step estimator with Windmeijer (2005) corrected robust SEs
 # - Time dummies to guard against cross-section correlation
 
@@ -240,28 +245,42 @@ panel_data <- fundamentals %>%
     svo = Cash.Dividends.Paid...Common.Stock.Buyback...Net / Shareholders.Equity...Common,
     # Financialization measure 3: Debt to revenue (debt-trap)
     dtr = (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Revenue.from.Business.Activities...Total,
+    # Financial liabilities / Total Assets (Jibril et al. 2018 base variable)
+    fl_ta = (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Total.Assets,
     # Control: log(Total Assets) as firm-size proxy (Jibril et al. 2018)
     log_ta = log(Total.Assets)
   ) %>%
-  select(Symbol, Year, log_capex, fin, svo, dtr, log_ta) %>%
+  select(Symbol, Year, log_capex, fin, svo, dtr, fl_ta, log_ta) %>%
   filter(is.finite(log_capex), is.finite(fin), is.finite(svo), is.finite(dtr),
-         is.finite(log_ta))
+         is.finite(fl_ta), is.finite(log_ta))
 
 # Convert to pdata.frame (panel data frame required by plm)
 pdata <- pdata.frame(panel_data, index = c("Symbol", "Year"))
 
 # ============================================================================
-# 4.2 Two-step Difference GMM (Jibril et al. 2018 approach)
+# 4.2 Model 1: Crowding-out hypothesis (Jibril et al. 2018, eq. 1)
 # ============================================================================
-# - Dependent variable: log(CapEx)
-# - All RHS variables lagged one period (predetermined)
-# - Instruments: lagged levels t-2 to t-4 (limits instrument proliferation)
-# - Two-way effects (firm FE removed by differencing, time dummies included)
-# - Two-step estimator with Windmeijer (2005) corrected robust SEs
+# Tests whether higher financial asset holdings crowd out real investment.
+# Base specification: fin (FA/TA), fl_ta (FL/TA), log_ta
 
-gmm_levels <- pgmm(
-  log_capex ~ lag(log_capex, 1) + lag(fin, 1) + lag(svo, 1) + lag(dtr, 1) + lag(log_ta, 1)
-  | lag(log_capex, 2:4) + lag(fin, 2:4) + lag(svo, 2:4) + lag(dtr, 2:4)
+gmm_m1 <- pgmm(
+  log_capex ~ lag(log_capex, 1) + lag(fin, 1) + lag(fl_ta, 1) + lag(log_ta, 1)
+  | lag(log_capex, 2:4) + lag(fin, 2:4) + lag(fl_ta, 2:4) + lag(log_ta, 2:4),
+  data = pdata,
+  effect = "twoways",
+  model = "twosteps",
+  transformation = "d"
+)
+
+# ============================================================================
+# 4.3 Model 2: Shareholder-value orientation (Jibril et al. 2018, eq. 2-3)
+# ============================================================================
+# Tests whether shareholder payouts (dividends + buybacks) reduce investment.
+# Augments base with svo (shareholder payouts / equity)
+
+gmm_m2 <- pgmm(
+  log_capex ~ lag(log_capex, 1) + lag(fin, 1) + lag(fl_ta, 1) + lag(svo, 1) + lag(log_ta, 1)
+  | lag(log_capex, 2:4) + lag(fin, 2:4) + lag(fl_ta, 2:4) + lag(svo, 2:4)
     + lag(log_ta, 2:4),
   data = pdata,
   effect = "twoways",
@@ -269,28 +288,53 @@ gmm_levels <- pgmm(
   transformation = "d"
 )
 
-summary(gmm_levels, robust = TRUE)
+# ============================================================================
+# 4.4 Model 3: Debt-trap hypothesis (Jibril et al. 2018, eq. 4)
+# ============================================================================
+# Tests whether higher debt burdens constrain real investment.
+# Augments base with dtr (total debt / revenue)
 
-# Diagnostic tests - Levels specification
-cat("\n=== DIAGNOSTICS: Levels Specification (Two-Step) ===\n")
-
-# Sargan test: H0 = instruments are valid. Want p > 0.05 (do NOT reject).
-cat("\nSargan test of overidentifying restrictions:\n")
-print(sargan(gmm_levels))
-
-# AR(1): Should be significant (expected by construction of first-differencing).
-# AR(2): Must be INsignificant (p > 0.05) to validate moment conditions.
-cat("\nArellano-Bond AR(1) test:\n")
-print(mtest(gmm_levels, order = 1))
-cat("\nArellano-Bond AR(2) test:\n")
-print(mtest(gmm_levels, order = 2))
+gmm_m3 <- pgmm(
+  log_capex ~ lag(log_capex, 1) + lag(fin, 1) + lag(fl_ta, 1) + lag(dtr, 1) + lag(log_ta, 1)
+  | lag(log_capex, 2:4) + lag(fin, 2:4) + lag(fl_ta, 2:4) + lag(dtr, 2:4)
+    + lag(log_ta, 2:4),
+  data = pdata,
+  effect = "twoways",
+  model = "twosteps",
+  transformation = "d"
+)
 
 # ============================================================================
-# 4.3 Output results
+# 4.5 Display results and diagnostics
+# ============================================================================
+
+run_diagnostics <- function(model, label) {
+  cat(paste0("\n", strrep("=", 70), "\n"))
+  cat(paste0("  ", label, "\n"))
+  cat(paste0(strrep("=", 70), "\n"))
+  print(summary(model, robust = TRUE))
+  cat("\nSargan test (H0: instruments valid, want p > 0.05):\n")
+  print(sargan(model))
+  cat("\nAR(1) test (expected significant):\n")
+  print(mtest(model, order = 1))
+  cat("\nAR(2) test (must be INsignificant, p > 0.05):\n")
+  print(mtest(model, order = 2))
+}
+
+run_diagnostics(gmm_m1, "Model 1: Crowding-out (fin, fl_ta, log_ta)")
+run_diagnostics(gmm_m2, "Model 2: Shareholder-value (fin, fl_ta, svo, log_ta)")
+run_diagnostics(gmm_m3, "Model 3: Debt-trap (fin, fl_ta, dtr, log_ta)")
+
+# ============================================================================
+# 4.6 Output results
 # ============================================================================
 
 modelsummary(
-  list("Two-Step GMM" = gmm_levels),
+  list(
+    "M1: Crowding-out" = gmm_m1,
+    "M2: SVO" = gmm_m2,
+    "M3: Debt-trap" = gmm_m3
+  ),
   output = "gmm_results.txt"
 )
 
