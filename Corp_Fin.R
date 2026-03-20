@@ -287,64 +287,11 @@ cat("\nArellano-Bond AR(2) test:\n")
 print(mtest(gmm_levels, order = 2))
 
 # ============================================================================
-# 4.3 VERSION B: Log Specification (RHS variables also transformed)
-# ============================================================================
-# Uses inverse hyperbolic sine (asinh) transformation for RHS variables.
-# asinh(x) = log(x + sqrt(x^2 + 1)), which approximates log(2|x|) for large
-# |x| but is defined for zero and negative values -- essential since svo
-# (shareholder payouts) can be negative or zero.
-# (See Burbidge, Magee & Robb 1988).
-
-panel_data_log <- fundamentals %>%
-  mutate(
-    Year = year(Date),
-    # Dependent variable: log(Capital Expenditures) - natural log, same as Version A
-    log_capex = log(Capital.Expenditures...Total),
-    # RHS variables: asinh-transformed to handle zeros/negatives
-    fin = asinh((Cash...Short.Term.Investments + Loans...Receivables...Total) / Total.Assets),
-    svo = asinh(Cash.Dividends.Paid...Common.Stock.Buyback...Net / Shareholders.Equity...Common),
-    dtr = asinh((Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Revenue.from.Business.Activities...Total),
-    sales = asinh(Revenue.from.Business.Activities...Total / Total.Assets),
-    profit = asinh(Net.Income.after.Minority.Interest / Total.Assets)
-  ) %>%
-  select(Symbol, Year, log_capex, fin, svo, dtr, sales, profit) %>%
-  filter(is.finite(log_capex), is.finite(fin), is.finite(svo), is.finite(dtr),
-         is.finite(sales), is.finite(profit))
-
-pdata_log <- pdata.frame(panel_data_log, index = c("Symbol", "Year"))
-
-gmm_log <- pgmm(
-  log_capex ~ lag(log_capex, 1) + fin + svo + dtr + sales + profit
-  | lag(log_capex, 2:99) + lag(fin, 2:99) + lag(svo, 2:99) + lag(dtr, 2:99)
-    + lag(sales, 2:99) + lag(profit, 2:99),
-  data = pdata_log,
-  effect = "twoways",
-  model = "twosteps",
-  transformation = "d"
-)
-
-summary(gmm_log, robust = TRUE)
-
-# Diagnostic tests - Log specification
-cat("\n=== DIAGNOSTICS: Log (asinh) Specification (Two-Step) ===\n")
-
-cat("\nSargan test of overidentifying restrictions:\n")
-print(sargan(gmm_log))
-
-cat("\nArellano-Bond AR(1) test:\n")
-print(mtest(gmm_log, order = 1))
-cat("\nArellano-Bond AR(2) test:\n")
-print(mtest(gmm_log, order = 2))
-
-# ============================================================================
-# 4.4 Output results
+# 4.3 Output results
 # ============================================================================
 
 modelsummary(
-  list(
-    "Levels RHS" = gmm_levels,
-    "Log RHS" = gmm_log
-  ),
+  list("Two-Step GMM" = gmm_levels),
   output = "gmm_results.txt"
 )
 
