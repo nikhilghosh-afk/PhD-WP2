@@ -1,9 +1,8 @@
 # 1. Installing Libraries
 
-install.packages("Cairo")
-library(Cairo)
 library(tidyverse)
 library(lubridate)
+library(dplyr)
 library(scales)
 library(ggrepel)
 library(ggplot2)
@@ -16,7 +15,7 @@ library(modelsummary)
 fundamentals <- read.csv("balance_sheet_data.csv", header = TRUE, stringsAsFactors = FALSE)
 
 fundamentals <- fundamentals %>%
-  mutate(Date = ymd(Date)) %>%
+  mutate(Date = dmy(Date)) %>%
   mutate(Date = floor_date(Date, "year")) %>%
   arrange(Date)
 
@@ -27,7 +26,7 @@ fundamentals <- fundamentals %>%
   fill(SubRegion) %>%
   fill(GICS.Sub.Industry.Name) %>%
   mutate(Price = as.numeric(Price)) %>%
-  mutate(across(7:16, as.numeric))
+  mutate(across(7:17, as.numeric))
   
 
 fundamentals <- fundamentals %>%
@@ -48,71 +47,13 @@ fundamentals <- fundamentals %>%
  
 count_sample_segment <- fundamentals %>%
    group_by(Segment) %>%
-   summarise(n=n()/16)
+   summarise(n=n()/17)
 
 count_sample_region <- fundamentals %>%
   group_by(SubRegion) %>%
-  summarise(n=n()/16)
+  summarise(n=n()/17)
 
-# # 3.1 General Trends 
-# 
-# # Return on Equity by Region
-# 
-# roe_total_Region <- fundamentals %>%
-#   group_by(Date) %>%
-#   summarise(a = mean(Net.Income.after.Minority.Interest / Shareholders.Equity...Common, na.rm = TRUE),
-#             .groups = "drop") %>%
-#   mutate(SubRegion = "Total")
-# 
-# roe_grouped_Region <- fundamentals %>%
-#   group_by(SubRegion, Date) %>%
-#   summarise(a = mean(Net.Income.after.Minority.Interest / Shareholders.Equity...Common, na.rm = TRUE),
-#             .groups = "drop") 
-# 
-# roe_Region <- bind_rows(roe_total_Region, roe_grouped_Region)
-# 
-# roe_Region %>%
-#   ggplot(aes(x = Date,
-#              y = a,
-#              group = SubRegion,
-#              linetype = SubRegion)) +
-#   geom_line() +
-#   scale_colour_brewer(palette = "Set1") +
-#   labs(
-#     y = "Average Return on Equity",
-#     x = "Date",
-#     linetype = "Region"
-#   )
-# 
-# # Return on Equity by Sector
-# 
-# roe_total_Segment <- fundamentals %>%
-#   group_by(Date) %>%
-#   summarise(a = mean(Net.Income.after.Minority.Interest / Shareholders.Equity...Common, na.rm = TRUE),
-#             .groups = "drop") %>%
-#   mutate(Segment = "Total")
-# 
-# roe_grouped_Segment <- fundamentals %>%
-#   group_by(Segment, Date) %>%
-#   summarise(a = mean(Net.Income.after.Minority.Interest / Shareholders.Equity...Common, na.rm = TRUE),
-#             .groups = "drop") 
-# 
-# roe_Segment <- bind_rows(roe_total_Segment, roe_grouped_Segment)
-# 
-# roe_Segment %>%
-#   ggplot(aes(x = Date,
-#              y = a,
-#              group = Segment,
-#              linetype = Segment)) +
-#   geom_line() +
-#   scale_colour_brewer(palette = "Set1") +
-#   labs(
-#     y = "Average Return on Equity",
-#     x = "Date",
-#     linetype = "Segment"
-#   )
-
-# 3.2. Constructing Metrics
+# 3 Function to Calculate and Visualise Key Metrics
 
 calculate_metrics <- function(data, metric, group_var, y_label) {
   
@@ -125,29 +66,71 @@ calculate_metrics <- function(data, metric, group_var, y_label) {
     group_by({{group_var}}, Date) %>%
     summarise(a = mean({{metric}}, na.rm = TRUE), .groups = "drop")
   
- combined_df <- bind_rows(total_df, grouped_df) 
+ combined_df <- bind_rows(total_df, grouped_df)
+ 
+ group_col <- as.character(substitute(group_var))
+ group_levels <- sort(unique(combined_df[[group_col]]))
+ other_levels <- setdiff(group_levels, "Total")
+ 
+ set1_colours <- brewer.pal(max(3, length(other_levels)), "Set1")
+ colour_values <- setNames(
+   c("black", set1_colours[seq_along(other_levels)]),
+   c("Total", other_levels))
+ shape_values <- setNames(
+   c(16, 17:(16 + length(other_levels))),
+   c("Total", other_levels))
+ linetype_values <- setNames(
+   c("solid", rep("dashed", length(other_levels))),
+   c("Total", other_levels))
+ 
  plot <- combined_df %>%
-    ggplot(aes(x = Date, y = a, 
-               colour = {{group_var}}, 
-               shape = {{group_var}}, 
-               linetype = {{group_var}})) +
-    geom_line() +
-    geom_point() +
-    scale_x_date(breaks = scales::pretty_breaks(n = 10)) +
-    scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) +
-    scale_colour_brewer(palette = "Set1") +
-    labs(
-      y = y_label,
-      x = "Date",
-      colour = as.character(substitute(group_var)),
-      shape = as.character(substitute(group_var)),
-      linetype = as.character(substitute(group_var))
-    ) +
-    theme_minimal()
+   ggplot(aes(x = Date, y = a,
+              colour = {{group_var}},
+              shape = {{group_var}},
+              linetype = {{group_var}})) +
+   geom_line() +
+   geom_point() +
+   scale_x_date(breaks = scales::pretty_breaks(n = 10)) +
+   scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) +
+   scale_colour_manual(values = colour_values) +
+   scale_shape_manual(values = shape_values) +
+   scale_linetype_manual(values = linetype_values) +
+   labs(
+     y = y_label,
+     x = "Date",
+     colour = group_col,
+     shape = group_col,
+     linetype = group_col
+   ) +
+   theme_minimal()
   
  return(list(data = combined_df, plot = plot))
   
 }
+
+# 3.1 General Trends
+
+# # 3.1 General Trends 
+# 
+
+
+invest_Region <- fundamentals %>% 
+  group_by(Symbol) %>%
+  mutate(CAGR = ((Capital.Expenditures...Total/lag(Capital.Expenditures...Total))^(1/(year(Date-lag(year(Date))))) - 1))
+         
+         
+  calculate_metrics(Capital.Expenditures...Total, 
+                    SubRegion, "Fixed Capital Expenditure (CAGR)")
+
+invest_Segment <- fundamentals %>% 
+  calculate_metrics(Capital.Expenditures...Total, 
+                    Segment, "Fixed Capital Expenditure (CAGR)")
+
+
+
+
+
+# 3.2. Indicators of Financialization
 
 # Metric 1: Financial Assets
 
@@ -160,15 +143,16 @@ fin_assets_Segment <- fundamentals %>%
   calculate_metrics((Cash...Short.Term.Investments + Loans...Receivables...Total) * 100 / Total.Assets, 
                     Segment, "Financial Assets / Total Assets (%)")
 
+
 # Metric 2: Shareholder Payouts
 
 share_pay_Region <- fundamentals %>%
-  calculate_metrics(Cash.Dividends.Paid...Common.Stock.Buyback...Net*100 / Shareholders.Equity...Common,
+  calculate_metrics((Dividends.Paid...Cash...Total...Cash.Flow + Common.Stock.Buyback...Net)*100 / Shareholders.Equity...Common,
                     SubRegion, "Shareholder Payouts / Total Common Equity (%)")
 
 
 share_pay_Segment <- fundamentals %>%
-  calculate_metrics(Cash.Dividends.Paid...Common.Stock.Buyback...Net*100 / Shareholders.Equity...Common,
+  calculate_metrics((Dividends.Paid...Cash...Total...Cash.Flow + Common.Stock.Buyback...Net)*100 / Shareholders.Equity...Common,
                     Segment, "Shareholder Payouts / Total Common Equity (%)") 
 
 
@@ -182,45 +166,62 @@ debt_rev_Segment <- fundamentals %>%
   calculate_metrics((Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable)*100 / Revenue.from.Business.Activities...Total,
                     Segment, "Total Short and Long Term Debt to Total Revenue (%)" )
 
-# # Metric 4: Intangible Assets
+
+# # Outputs
 # 
-# intang_assets_Region <- fundamentals %>%
-#   calculate_metrics(Intangible.Assets...Total...Net*100 / Total.Assets,
-#                     SubRegion, "Intangible Assets / Total Assets (%)")
+# write.csv(fin_assets_Region$data, "financial_assets_Region.csv")
+# ggsave("financial_assets_Region.png", fin_assets_Region$plot, width = 10, height = 6, dpi = 100)
+# write.csv(fin_assets_Segment$data, "financial_assets_Segment.csv")
+# ggsave("financial_assets_Segment.png", fin_assets_Segment$plot, width = 10, height = 6, dpi = 100)
+# write.csv(share_pay_Region$data, "share_pay_Region.csv")
+# ggsave("share_pay_Region.png", share_pay_Region$plot, width = 10, height = 6, dpi = 100)
+# write.csv(share_pay_Segment$data, "share_pay_Segment.csv")
+# ggsave("share_pay_Segment.png", share_pay_Segment$plot, width = 10, height = 6, dpi = 100)
+# write.csv(debt_rev_Region$data, "debt_rev_Region.csv")
+# ggsave("debt_rev_Region.png", debt_rev_Region$plot, width = 10, height = 6, dpi = 100)
+# write.csv(debt_rev_Segment$data, "debt_rev_Segment.csv")
+# ggsave("debt_rev_Segment.png", debt_rev_Segment$plot, width = 10, height = 6, dpi = 100)
+
+# Fixed Effects Model - Has Financialization Reduced Fixed Capital Investment?
+
+# panel_data <- fundamentals %>%
+#   mutate(
+#     Year = year(Date),
+#     # Dependent variable: log(Capital Expenditures)
+#     log_capex = log(Capital.Expenditures...Total),
+#     # Financialization measure 1: Financial assets ratio (crowding-out)
+#     fin = (Cash...Short.Term.Investments + Loans...Receivables...Total) / Total.Assets,
+#     # Financialization measure 2: Shareholder payouts to equity (shareholder-value)
+#     svo = (Dividends.Paid...Cash...Total...Cash.Flow + Common.Stock.Buyback...Net) / Shareholders.Equity...Common,
+#     # Financialization measure 3: Debt to revenue (debt-trap)
+#     dtr = (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Revenue.from.Business.Activities...Total,
+#     # Control: log(Total Assets) as firm-size proxy 
+#     log_ta = log(Total.Assets)
+#   ) %>%
+#   select(Symbol, Year, log_capex, fin, svo, dtr, log_ta) %>%
+#   filter(is.finite(log_capex), is.finite(fin), is.finite(svo), is.finite(dtr),
+#          is.finite(log_ta))
 # 
-# intang_assets_Segment <- fundamentals %>%
-#   calculate_metrics(Intangible.Assets...Total...Net*100 / Total.Assets,
-#                     Segment, "Intangible Assets / Total Assets (%)")
-
-
-# Outputs
-
-write.csv(fin_assets_Region$data, "financial_assets_Region.csv")
-ggsave("financial_assets_Region.png", fin_assets_Region$plot, width = 10, height = 6, dpi = 100)
-write.csv(fin_assets_Segment$data, "financial_assets_Segment.csv")
-ggsave("financial_assets_Segment.png", fin_assets_Segment$plot, width = 10, height = 6, dpi = 100)
-write.csv(share_pay_Region$data, "share_pay_Region.csv")
-ggsave("share_pay_Region.png", share_pay_Region$plot, width = 10, height = 6, dpi = 100)
-write.csv(share_pay_Segment$data, "share_pay_Segment.csv")
-ggsave("share_pay_Segment.png", share_pay_Segment$plot, width = 10, height = 6, dpi = 100)
-write.csv(debt_rev_Region$data, "debt_rev_Region.csv")
-ggsave("debt_rev_Region.png", debt_rev_Region$plot, width = 10, height = 6, dpi = 100)
-write.csv(debt_rev_Segment$data, "debt_rev_Segment.csv")
-ggsave("debt_rev_Segment.png", debt_rev_Segment$plot, width = 10, height = 6, dpi = 100)
-# write.csv(intang_assets_Region$data, "intang_assets_Region.csv")
-# ggsave("intang_assets_Region.png", intang_assets_Region$plot, width = 10, height = 6, dpi = 300)
-# write.csv(intang_assets_Segment$data, "intang_assets_Segment.csv")
-# ggsave("intang_assets_Segment.png", intang_assets_Segment$plot, width = 10, height = 6, dpi = 300)
-
-# # Fixed Effects Model - Has Financialization Reduced Fixed Capital Investment?
+# # Convert to pdata.frame (panel data frame required by plm)
+# pdata <- pdata.frame(panel_data, index = c("Symbol", "Year"))
 # 
-# sample_input <- fundamentals %>%
-#   mutate(fir = Capital.Expenditures...Total / Total.Assets) %>%
-#   mutate(fin = Cash...Short.Term.Investments / Total.Assets) %>%
-#   mutate(svo = Cash.Dividends.Paid...Common.Stock.Buyback...Net / Shareholders.Equity...Common) %>%
-#   mutate(dtr = (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Revenue.from.Business.Activities...Total) %>%
-#   select(Date, Symbol, fir, fin, svo, dtr)
+# # ============================================================================
+# # 4.2 Two-step Difference GMM (Jibril et al. 2018 approach)
+# # ============================================================================
+# # - Dependent variable: log(CapEx)
+# # - All RHS variables lagged one period (predetermined)
+# # - Instruments: lagged levels t-2 to t-4 (limits instrument proliferation)
+# # - Two-way effects (firm FE removed by differencing, time dummies included)
+# # - Two-step estimator with Windmeijer (2005) corrected robust SEs
 # 
-# reg = lm(fir ~ fin + svo + dtr, data = sample_input)
-# summary(reg)
-
+# gmm_levels <- pgmm(
+#   log_capex ~ lag(log_capex, 1) + lag(fin, 1) + lag(svo, 1) + lag(dtr, 1) + lag(log_ta, 1)
+#   | lag(log_capex, 2:4) + lag(fin, 2:4) + lag(svo, 2:4) + lag(dtr, 2:4)
+#   + lag(log_ta, 2:4),
+#   data = pdata,
+#   effect = "twoways",
+#   model = "twosteps",
+#   transformation = "d"
+# )
+# 
+# summary(gmm_levels, robust = TRUE)
