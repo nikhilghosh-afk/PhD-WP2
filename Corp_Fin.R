@@ -111,20 +111,29 @@ calculate_metrics <- function(data, metric, group_var, y_label) {
 # 3.1 General Trends
 
 # # 3.1 General Trends 
-# 
+
+# Investment
 
 
-invest_Region <- fundamentals %>% 
+invest_Region <- fundamentals %>%
   group_by(Symbol) %>%
-  mutate(CAGR = ((Capital.Expenditures...Total/lag(Capital.Expenditures...Total))^(1/(year(Date-lag(year(Date))))) - 1))
-         
-         
-  calculate_metrics(Capital.Expenditures...Total, 
-                    SubRegion, "Fixed Capital Expenditure (CAGR)")
+  calculate_metrics(Capital.Expenditures...Total / Company.Market.Capitalization,
+                    SubRegion, "Fixed Capital Expenditure (% of Market Cap)")
 
-invest_Segment <- fundamentals %>% 
-  calculate_metrics(Capital.Expenditures...Total, 
-                    Segment, "Fixed Capital Expenditure (CAGR)")
+invest_Segment <- fundamentals %>%
+  calculate_metrics(Capital.Expenditures...Total / Company.Market.Capitalization,
+                    Segment, "Fixed Capital Expenditure (% of Market Cap)")
+
+# Return on Assets
+
+roa_Region <- fundamentals %>%
+  group_by(Symbol) %>%
+  calculate_metrics(Net.Income.after.Minority.Interest / Total.Assets,
+                    SubRegion, "Fixed Capital Expenditure (% of Market Cap)")
+
+roa_Segment <- fundamentals %>%
+  calculate_metrics(Net.Income.after.Minority.Interest / Total.Assets,
+                    Segment, "Fixed Capital Expenditure (% of Market Cap)")
 
 
 
