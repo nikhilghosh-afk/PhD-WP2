@@ -26,6 +26,7 @@ fundamentals <- fundamentals %>%
   fill(SubRegion) %>%
   fill(GICS.Sub.Industry.Name) %>%
   mutate(Price = as.numeric(Price)) %>%
+  mutate(Company.Market.Capitalization = as.numeric(Company.Market.Capitalization)) %>%
   mutate(across(7:17, as.numeric))
   
 
@@ -111,23 +112,40 @@ calculate_metrics <- function(data, metric, group_var, y_label) {
 # 3.1 General Trends
 
 # # 3.1 General Trends 
-# 
+
+# Investment
 
 
-invest_Region <- fundamentals %>% 
+invest_Region <- fundamentals %>%
   group_by(Symbol) %>%
-  mutate(CAGR = ((Capital.Expenditures...Total/lag(Capital.Expenditures...Total))^(1/(year(Date-lag(year(Date))))) - 1))
-         
-         
-  calculate_metrics(Capital.Expenditures...Total, 
-                    SubRegion, "Fixed Capital Expenditure (CAGR)")
+  calculate_metrics(Capital.Expenditures...Total * 100 / Company.Market.Capitalization,
+                    SubRegion, "Fixed Capital Expenditure (% of Market Cap)")
 
-invest_Segment <- fundamentals %>% 
-  calculate_metrics(Capital.Expenditures...Total, 
-                    Segment, "Fixed Capital Expenditure (CAGR)")
+invest_Segment <- fundamentals %>%
+  calculate_metrics(Capital.Expenditures...Total * 100 / Company.Market.Capitalization,
+                    Segment, "Fixed Capital Expenditure (% of Market Cap)")
+
+write.csv(invest_Region$data, "investment_Region.csv")
+ggsave("investment_Region.png", invest_Region$plot, width = 10, height = 6, dpi = 100)
+write.csv(invest_Segment$data, "investment_Segment.csv")
+ggsave("investment_Segment.png", invest_Segment$plot, width = 10, height = 6, dpi = 100)
+
+# Return on Assets
+
+roa_Region <- fundamentals %>%
+  group_by(Symbol) %>%
+  calculate_metrics(Net.Income.after.Minority.Interest * 100 / Total.Assets,
+                    SubRegion, "Fixed Capital Expenditure (% of Market Cap)")
+
+roa_Segment <- fundamentals %>%
+  calculate_metrics(Net.Income.after.Minority.Interest * 100 / Total.Assets,
+                    Segment, "Fixed Capital Expenditure (% of Market Cap)")
 
 
-
+write.csv(roa_Region$data, "returnonassets_Region.csv")
+ggsave("returnonassets_Region.png", roa_Region$plot, width = 10, height = 6, dpi = 100)
+write.csv(roa_Segment$data, "returnonassets_Segment.csv")
+ggsave("returnon_Segment.png", roa_Segment$plot, width = 10, height = 6, dpi = 100)
 
 
 # 3.2. Indicators of Financialization
@@ -143,6 +161,11 @@ fin_assets_Segment <- fundamentals %>%
   calculate_metrics((Cash...Short.Term.Investments + Loans...Receivables...Total) * 100 / Total.Assets, 
                     Segment, "Financial Assets / Total Assets (%)")
 
+write.csv(fin_assets_Region$data, "financial_assets_Region.csv")
+ggsave("financial_assets_Region.png", fin_assets_Region$plot, width = 10, height = 6, dpi = 100)
+write.csv(fin_assets_Segment$data, "financial_assets_Segment.csv")
+ggsave("financial_assets_Segment.png", fin_assets_Segment$plot, width = 10, height = 6, dpi = 100)
+
 
 # Metric 2: Shareholder Payouts
 
@@ -155,6 +178,11 @@ share_pay_Segment <- fundamentals %>%
   calculate_metrics((Dividends.Paid...Cash...Total...Cash.Flow + Common.Stock.Buyback...Net)*100 / Shareholders.Equity...Common,
                     Segment, "Shareholder Payouts / Total Common Equity (%)") 
 
+write.csv(share_pay_Region$data, "share_pay_Region.csv")
+ggsave("share_pay_Region.png", share_pay_Region$plot, width = 10, height = 6, dpi = 100)
+write.csv(share_pay_Segment$data, "share_pay_Segment.csv")
+ggsave("share_pay_Segment.png", share_pay_Segment$plot, width = 10, height = 6, dpi = 100)
+
 
 # Metric 3: Debt to Revenue
 
@@ -166,21 +194,13 @@ debt_rev_Segment <- fundamentals %>%
   calculate_metrics((Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable)*100 / Revenue.from.Business.Activities...Total,
                     Segment, "Total Short and Long Term Debt to Total Revenue (%)" )
 
+write.csv(debt_rev_Region$data, "debt_rev_Region.csv")
+ggsave("debt_rev_Region.png", debt_rev_Region$plot, width = 10, height = 6, dpi = 100)
+write.csv(debt_rev_Segment$data, "debt_rev_Segment.csv")
+ggsave("debt_rev_Segment.png", debt_rev_Segment$plot, width = 10, height = 6, dpi = 100)
 
-# # Outputs
-# 
-# write.csv(fin_assets_Region$data, "financial_assets_Region.csv")
-# ggsave("financial_assets_Region.png", fin_assets_Region$plot, width = 10, height = 6, dpi = 100)
-# write.csv(fin_assets_Segment$data, "financial_assets_Segment.csv")
-# ggsave("financial_assets_Segment.png", fin_assets_Segment$plot, width = 10, height = 6, dpi = 100)
-# write.csv(share_pay_Region$data, "share_pay_Region.csv")
-# ggsave("share_pay_Region.png", share_pay_Region$plot, width = 10, height = 6, dpi = 100)
-# write.csv(share_pay_Segment$data, "share_pay_Segment.csv")
-# ggsave("share_pay_Segment.png", share_pay_Segment$plot, width = 10, height = 6, dpi = 100)
-# write.csv(debt_rev_Region$data, "debt_rev_Region.csv")
-# ggsave("debt_rev_Region.png", debt_rev_Region$plot, width = 10, height = 6, dpi = 100)
-# write.csv(debt_rev_Segment$data, "debt_rev_Segment.csv")
-# ggsave("debt_rev_Segment.png", debt_rev_Segment$plot, width = 10, height = 6, dpi = 100)
+
+
 
 # Fixed Effects Model - Has Financialization Reduced Fixed Capital Investment?
 
