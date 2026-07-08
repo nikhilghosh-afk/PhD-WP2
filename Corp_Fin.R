@@ -45,6 +45,8 @@ SAMPLE_REDUCED <- sample %>%
 
 SAMPLE_REDUCED_RICS <- as_tibble(SAMPLE_REDUCED$Instrument)
 
+# These files go back into Refinitiv
+
 write.csv(SAMPLE_REDUCED, file = "WP8_food_companies_sample.csv")
 write.csv(SAMPLE_REDUCED_RICS, file = "WP8_RICs.csv")
 
@@ -55,17 +57,18 @@ write.csv(SAMPLE_REDUCED_RICS, file = "WP8_RICs.csv")
 fundamentals <- read.csv("balance_sheet_data.csv", header = TRUE, stringsAsFactors = FALSE)
 
 fundamentals <- fundamentals %>%
-  mutate(Date = dmy(Date)) %>%
+  mutate(Date = ymd(Date)) %>%
   mutate(Date = floor_date(Date, "year")) %>%
-  arrange(Date)
+  arrange(Date) %>%
+  select(-X)
 
 fundamentals <- fundamentals %>%
-  group_by(Symbol) %>%
+  group_by(Instrument) %>%
   mutate(across(!Date, ~ifelse(.=="", NA, as.character(.))))%>%
-  fill(Country) %>%
-  fill(SubRegion) %>%
+  fill(Country.of.Exchange) %>%
+  fill(Earnings.Quality.Region) %>%
   fill(GICS.Sub.Industry.Name) %>%
-  mutate(Price = as.numeric(Price)) %>%
+  mutate(Price.Close = as.numeric(Price.Close)) %>%
   mutate(Company.Market.Capitalization = as.numeric(Company.Market.Capitalization)) %>%
   mutate(across(7:17, as.numeric))
 
@@ -74,7 +77,7 @@ fundamentals <- fundamentals %>%
 # SIGMAFA.MX 2005: market cap recorded as ~2,000 instead of ~2 billion (data provider glitch)
 fundamentals <- fundamentals %>%
   mutate(Company.Market.Capitalization = ifelse(
-    Symbol == "SIGMAFA.MX" & year(Date) == 2005,
+    Instrument == "SIGMAFA.MX" & year(Date) == 2005,
     NA, Company.Market.Capitalization))
 
 # Turkish lira redenomination (Jan 2005, 6 zeros removed):
@@ -82,10 +85,10 @@ fundamentals <- fundamentals %>%
 fundamentals <- fundamentals %>%
   mutate(
     Total.Assets = ifelse(
-      Symbol %in% c("GUBRF.IS", "KENT.IS") & year(Date) %in% 2000:2003 & Total.Assets > 1e12,
+      Instrument %in% c("GUBRF.IS", "KENT.IS") & year(Date) %in% 2000:2003 & Total.Assets > 1e12,
       NA, Total.Assets),
     Company.Market.Capitalization = ifelse(
-      Symbol %in% c("GUBRF.IS", "KENT.IS", "MGROS.IS") & year(Date) %in% 2003:2004
+      Instrument %in% c("GUBRF.IS", "KENT.IS", "MGROS.IS") & year(Date) %in% 2003:2004
         & Company.Market.Capitalization > 1e10,
       NA, Company.Market.Capitalization))
 
@@ -99,19 +102,19 @@ fundamentals <- fundamentals %>%
   )
 
 fundamentals <- fundamentals %>%
-  mutate(SubRegion = recode(SubRegion, "Japan" = "Developed Asia")) %>%
-  mutate(SubRegion = recode(SubRegion, "Developed Asia" = "DAO")) %>%
-  mutate(SubRegion = recode(SubRegion, "North America" = "NA")) %>%
-  mutate(SubRegion = recode(SubRegion, "Developed Europe" = "DE")) %>%
-  mutate(SubRegion = recode(SubRegion, "Emerging Markets" = "DEC"))
+  mutate(Region = recode(Earnings.Quality.Region,
+                         "Japan"            = "Developed Asia and Oceanea",
+                         "Developed Asia"   = "Developed Asia and Oceanea",
+                         "Emerging Markets" = "Developing and Emerging Economies"
+  ))
  
 count_sample_segment <- fundamentals %>%
-   group_by(Segment) %>%
-   summarise(n=n()/17)
+   group_by(Segment, Date) %>%
+   summarise(n=n(), .groups = "drop")
 
 count_sample_region <- fundamentals %>%
-  group_by(SubRegion) %>%
-  summarise(n=n()/17)
+  group_by(Region, Date) %>%
+  summarise(n=n(), .groups = "drop")
 
 # 3 Function to Calculate and Visualise Key Metrics
 
@@ -168,17 +171,13 @@ calculate_metrics <- function(data, metric, group_var, y_label) {
   
 }
 
-# 3.1 General Trends
-
-# # 3.1 General Trends 
-
 # Investment
 
 
 invest_Region <- fundamentals %>%
-  group_by(Symbol) %>%
+  group_by(Instrument) %>%
   calculate_metrics(Capital.Expenditures...Total * 100 / Company.Market.Capitalization,
-                    SubRegion, "Fixed Capital Expenditure (% of Market Cap)")
+                    Region, "Fixed Capital Expenditure (% of Market Cap)")
 
 invest_Segment <- fundamentals %>%
   calculate_metrics(Capital.Expenditures...Total * 100 / Company.Market.Capitalization,
@@ -192,9 +191,9 @@ ggsave("investment_Segment.png", invest_Segment$plot, width = 10, height = 6, dp
 # Return on Assets
 
 roa_Region <- fundamentals %>%
-  group_by(Symbol) %>%
+  group_by(Instrument) %>%
   calculate_metrics(Net.Income.after.Minority.Interest * 100 / Total.Assets,
-                    SubRegion, "Fixed Capital Expenditure (% of Market Cap)")
+                    Region, "Fixed Capital Expenditure (% of Market Cap)")
 
 roa_Segment <- fundamentals %>%
   calculate_metrics(Net.Income.after.Minority.Interest * 100 / Total.Assets,
@@ -207,13 +206,11 @@ write.csv(roa_Segment$data, "returnonassets_Segment.csv")
 ggsave("returnon_Segment.png", roa_Segment$plot, width = 10, height = 6, dpi = 100)
 
 
-# 3.2. Indicators of Financialisation
-
 # Metric 1: Financial Assets
 
 fin_assets_Region <- fundamentals %>% 
   calculate_metrics((Cash...Short.Term.Investments + Loans...Receivables...Total) * 100 / Total.Assets, 
-                    SubRegion, "Financial Assets / Total Assets (%)")
+                    Region, "Financial Assets / Total Assets (%)")
 
 
 fin_assets_Segment <- fundamentals %>% 
@@ -230,7 +227,7 @@ ggsave("financial_assets_Segment.png", fin_assets_Segment$plot, width = 10, heig
 
 share_pay_Region <- fundamentals %>%
   calculate_metrics((Dividends.Paid...Cash...Total...Cash.Flow + Common.Stock.Buyback...Net)*100 / Shareholders.Equity...Common,
-                    SubRegion, "Shareholder Payouts / Total Common Equity (%)")
+                    Region, "Shareholder Payouts / Total Common Equity (%)")
 
 
 share_pay_Segment <- fundamentals %>%
@@ -247,7 +244,7 @@ ggsave("share_pay_Segment.png", share_pay_Segment$plot, width = 10, height = 6, 
 
 debt_rev_Region <- fundamentals %>%
   calculate_metrics((Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable)*100 / Revenue.from.Business.Activities...Total,
-                    SubRegion, "Total Short and Long Term Debt to Total Revenue (%)")
+                    Region, "Total Short and Long Term Debt to Total Revenue (%)")
 
 debt_rev_Segment <- fundamentals %>%
   calculate_metrics((Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable)*100 / Revenue.from.Business.Activities...Total,
@@ -277,12 +274,12 @@ mutate(
     # Control: log(Total Assets) as firm-size proxy
     log_ta = log(Total.Assets)
   ) %>%
-  select(Symbol, Year, log_capex, fin, svo, dtr, log_ta) %>%
+  select(Instrument, Year, log_capex, fin, svo, dtr, log_ta) %>%
   filter(is.finite(log_capex), is.finite(fin), is.finite(svo), is.finite(dtr),
          is.finite(log_ta))
 
 # Convert to pdata.frame (panel data frame required by plm)
-pdata <- pdata.frame(panel_data, index = c("Symbol", "Year"))
+pdata <- pdata.frame(panel_data, index = c("Instrument", "Year"))
 
 
 # Two-step Difference GMM
