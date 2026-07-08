@@ -1,4 +1,4 @@
-# 1. Installing Libraries
+# Installing Libraries
 
 library(tidyverse)
 library(lubridate)
@@ -10,7 +10,47 @@ library(RColorBrewer)
 library(plm)
 library(modelsummary)
 
-# 2. Reading & Cleaning Data
+# Stage 1. Cleaning Data
+
+
+sample <- read.csv("full_screen.csv", header = TRUE)
+prices <- read.csv("screen_price_data.csv", header = TRUE)
+
+
+# Reducing to Time Consistent Sample 
+
+prices <- prices %>%
+# Note Refinitiv can sometimes export dates as dmy
+  mutate(Date = ymd(Date))
+  mutate(Price.Close = as.numeric(Price.Close)) %>%
+  group_by(Instrument) %>%
+  fill(Price.Close) %>%
+  mutate(Date = floor_date(Date, "month")) %>%
+  distinct(Date, .keep_all = TRUE) %>%
+  ungroup() %>%
+  arrange(Instrument)
+
+prices <- prices %>%
+  na.omit() %>%  
+  group_by(Instrument) %>%
+  mutate(n = n()) %>%
+  ungroup() %>%
+  filter(n == max(n)) %>%
+  select(-n) %>%
+  group_by(Instrument) %>%
+  summarise(n=n())
+
+SAMPLE_REDUCED <- sample %>%
+  filter(Instrument %in% prices$Instrument)
+
+SAMPLE_REDUCED_RICS <- as_tibble(SAMPLE_REDUCED$Instrument)
+
+write.csv(SAMPLE_REDUCED, file = "WP8_food_companies_sample.csv")
+write.csv(SAMPLE_REDUCED_RICS, file = "WP8_RICs.csv")
+
+# Stage 2. Data Analysis
+
+# Reading and cleaning Data
 
 fundamentals <- read.csv("balance_sheet_data.csv", header = TRUE, stringsAsFactors = FALSE)
 
