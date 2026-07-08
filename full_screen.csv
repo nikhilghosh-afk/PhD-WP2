@@ -1,0 +1,551 @@
+,Instrument,Company Common Name,Country of Exchange,Company Market Cap,GICS Sub-Industry Code,GICS Sub-Industry Name
+111,WMT.OQ,Walmart Inc,United States of America,887644148948.7,30101040,Consumer Staples Merchandise Retail
+76,COST.OQ,Costco Wholesale Corp,United States of America,420196166790.0,30101040,Consumer Staples Merchandise Retail
+15,KO.N,Coca-Cola Co,United States of America,361623647232.9,30201030,Soft Drinks & Non-alcoholic Beverages
+28,NESN.S,Nestle SA,Switzerland,272506687872.763,30202030,Packaged Foods & Meats
+98,MCD.N,McDonald's Corp,United States of America,200511858468.39,25301040,Restaurants
+63,PEP.OQ,PepsiCo Inc,United States of America,198154070308.7,30201030,Soft Drinks & Non-alcoholic Beverages
+4,DE.N,Deere & Co,United States of America,162936929104.25,20106015,Agricultural & Farm Machinery
+163,SBUX.OQ,Starbucks Corp,United States of America,118084317000.0,25301040,Restaurants
+457,MNST.OQ,Monster Beverage Corp,United States of America,94788546021.2,30201030,Soft Drinks & Non-alcoholic Beverages
+461,DASH.OQ,DoorDash Inc,United States of America,85278868269.84,25301040,Restaurants
+265,MDLZ.OQ,Mondelez International Inc,United States of America,77301388908.52,30202030,Packaged Foods & Meats
+472,3690.HK,Meituan,Hong Kong,63702840752.1073,25301040,Restaurants
+70,ATD.TO,Alimentation Couche-Tard Inc,Canada,59379777955.525,30101030,Food Retail
+507,9633.HK,Nongfu Spring Co Ltd,Hong Kong,58457473566.191,30201030,Soft Drinks & Non-alcoholic Beverages
+501,CTVA.N,Corteva Inc,United States of America,58020135000.0,15101030,Fertilizers & Agricultural Chemicals
+79,TGT.N,Target Corp,United States of America,57932076335.6,30101040,Consumer Staples Merchandise Retail
+10,DANO.PA,Danone SA,France,57848319012.0463,30202030,Packaged Foods & Meats
+16,CPG.L,Compass Group PLC,United Kingdom,55264378910.0,25301040,Restaurants
+95,L.TO,Loblaw Companies Ltd,Canada,51467110939.531,30101030,Food Retail
+156,WALMEX.MX,Wal Mart de Mexico SAB de CV,Mexico,49250958515.0422,30101040,Consumer Staples Merchandise Retail
+469,CCEP.OQ,Coca-Cola Europacific Partners PLC,United States of America,47202678340.5,30201030,Soft Drinks & Non-alcoholic Beverages
+240,YUM.N,Yum! Brands Inc,United States of America,46163795122.98,25301040,Restaurants
+314,CMG.N,Chipotle Mexican Grill Inc,United States of America,44061912900.0,25301040,Restaurants
+355,KDP.OQ,Keurig Dr Pepper Inc,United States of America,42844017741.79,30201030,Soft Drinks & Non-alcoholic Beverages
+215,NUTRESA.CN,Grupo Nutresa SA,Colombia,42120818054.1532,30202030,Packaged Foods & Meats
+107,SYY.N,Sysco Corp,United States of America,40463812288.96,30101020,Food Distributors
+27,TSCO.L,Tesco PLC,United Kingdom,39449578609.1882,30101030,Food Retail
+61,ADM.N,Archer-Daniels-Midland Co,United States of America,37689000411.4,30202010,Agricultural Products & Services
+57,AD.AS,Koninklijke Ahold Delhaize NV,Netherlands,36642958597.1423,30101030,Food Retail
+91,KR.N,Kroger Co,United States of America,35864371888.28,30101030,Food Retail
+87,HSY.N,Hershey Co,United States of America,35690291303.4,30202030,Packaged Foods & Meats
+30,2802.T,Ajinomoto Co Inc,Japan,34394771314.8991,30202030,Packaged Foods & Meats
+152,WOW.AX,Woolworths Group Ltd,Australia,33768277951.5318,30101030,Food Retail
+321,3382.T,Seven & i Holdings Co Ltd,Japan,32619213853.2297,30101030,Food Retail
+493,NTR.TO,Nutrien Ltd,Canada,31335574803.9439,15101030,Fertilizers & Agricultural Chemicals
+435,KHC.OQ,Kraft Heinz Co,United States of America,30000174241.4,30202030,Packaged Foods & Meats
+126,NEST.NS,Nestle India Ltd,India,29752521398.2178,30202030,Packaged Foods & Meats
+72,CASY.OQ,Caseys General Stores Inc,United States of America,29677570978.86,30101030,Food Retail
+388,002714.SZ,Muyuan Foods Group Co Ltd,China,29591963594.0766,30202030,Packaged Foods & Meats
+428,603288.SS,Foshan Haitian Flavouring and Food Co Ltd,China,29027490199.6859,30202030,Packaged Foods & Meats
+22,LISN.S,Chocoladefabriken Lindt & Spruengli AG,Switzerland,28214865357.8529,30202030,Packaged Foods & Meats
+421,ETEA.NS,Eternal Ltd,India,27892990843.9312,25301040,Restaurants
+454,AVEU.NS,Avenue Supermarts Ltd,India,27835497932.3755,30101030,Food Retail
+521,WN.TO,George Weston Ltd,Canada,26250175182.0551,30101030,Food Retail
+453,QSR.N,Restaurant Brands International Inc,United States of America,25655994963.62,25301040,Restaurants
+80,DG.N,Dollar General Corp,United States of America,25462316663.21,30101040,Consumer Staples Merchandise Retail
+36,8267.T,Aeon Co Ltd,Japan,24986333059.1338,30101040,Consumer Staples Merchandise Retail
+426,CCH.L,Coca-Cola HBC AG,United Kingdom,24575018058.6154,30201030,Soft Drinks & Non-alcoholic Beverages
+203,DLTR.OQ,Dollar Tree Inc,United States of America,23570213218.2,30101040,Consumer Staples Merchandise Retail
+212,600887.SS,Inner Mongolia Yili Industrial Group Co Ltd,China,23482438252.0888,30202030,Packaged Foods & Meats
+202,DRI.N,Darden Restaurants Inc,United States of America,23422408113.5,25301040,Restaurants
+433,USFD.N,US Foods Holding Corp,United States of America,22900850007.44,30101020,Food Distributors
+74,COL.AX,Coles Group Ltd,Australia,21783672404.4353,30101030,Food Retail
+536,BG.N,Bunge Global SA,United States of America,21518549134.65,30202010,Agricultural Products & Services
+110,TSN.N,Tyson Foods Inc,United States of America,20712251425.64,30202030,Packaged Foods & Meats
+238,000792.SZ,Qinghai Yanhu Industry Co Ltd,China,20664971812.7491,15101030,Fertilizers & Agricultural Chemicals
+280,AC.MX,Arca Continental SAB de CV,Mexico,20196829070.2652,30201030,Soft Drinks & Non-alcoholic Beverages
+84,GIS.N,General Mills Inc,United States of America,19800581491.6,30202030,Packaged Foods & Meats
+418,300999.SZ,Yihai Kerry Arawana Holdings Co Ltd,China,19369097444.3901,30202030,Packaged Foods & Meats
+39,6326.T,Kubota Corp,Japan,18996177133.5924,20106015,Agricultural & Farm Machinery
+269,WLIL.SI,Wilmar International Ltd,Singapore,18582846422.7674,30202010,Agricultural Products & Services
+13,ABF.L,Associated British Foods PLC,United Kingdom,18564314955.0768,30202030,Packaged Foods & Meats
+452,PFGC.N,Performance Food Group Co,United States of America,18143877790.5,30101020,Food Distributors
+316,CF.N,CF Industries Holdings Inc,United States of America,17658148753.56,15101030,Fertilizers & Agricultural Chemicals
+364,VARB.NS,Varun Beverages Ltd,India,17171177533.4888,30201030,Soft Drinks & Non-alcoholic Beverages
+216,000408.SZ,Zangge Mining Co Ltd,China,16295614131.6925,15101030,Fertilizers & Agricultural Chemicals
+287,2020.SE,SABIC Agri-Nutrients Company SJSC,Saudi Arabia,15821771019.2016,15101030,Fertilizers & Agricultural Chemicals
+21,KYGa.I,Kerry Group PLC,Ireland,15402958086.3258,30202030,Packaged Foods & Meats
+362,ARMK.N,Aramark,United States of America,14770101689.88,25301040,Restaurants
+480,YUMC.N,Yum China Holdings Inc,United States of America,14741002003.62,25301040,Restaurants
+97,MKC.N,McCormick & Company Inc,United States of America,14039576009.46,30202030,Packaged Foods & Meats
+11,CARR.PA,Carrefour SA,France,13907035757.1414,30101040,Consumer Staples Merchandise Retail
+155,BIMBOA.MX,Grupo Bimbo SAB de CV,Mexico,13907024477.6558,30202030,Packaged Foods & Meats
+141,1216.TW,Uni-President Enterprises Corp,Taiwan,13906040979.2814,30202030,Packaged Foods & Meats
+188,BRIT.NS,Britannia Industries Ltd,India,13754162997.2953,30202030,Packaged Foods & Meats
+88,HRL.N,Hormel Foods Corp,United States of America,13592779487.3,30202030,Packaged Foods & Meats
+535,JBS.N,Jbs NV,United States of America,13519420286.92,30202030,Packaged Foods & Meats
+99,MRU.TO,Metro Inc,Canada,13308634854.6517,30101030,Food Retail
+440,CNH.N,CNH Industrial NV,United States of America,12932684100.91,20106015,Agricultural & Farm Machinery
+294,CPALL.BK,CP All PCL,Thailand,12896665344.7685,30101030,Food Retail
+379,300498.SZ,Wens Foodstuff Group Co Ltd,China,12850642164.6893,30202030,Packaged Foods & Meats
+434,0288.HK,WH Group Ltd,Hong Kong,12827438090.21,30202030,Packaged Foods & Meats
+508,605499.SS,Eastroc Beverage (Group) Co Ltd,China,12718479699.2669,30201030,Soft Drinks & Non-alcoholic Beverages
+498,DHER.DE,Delivery Hero SE,Germany,12654002867.9487,25301040,Restaurants
+305,2280.SE,Almarai Company SJSC,Saudi Arabia,12511651442.1156,30202030,Packaged Foods & Meats
+526,BUAFOODS.LG,BUA Foods PLC,Nigeria,12346959647.021,30202030,Packaged Foods & Meats
+303,TXRH.OQ,Texas Roadhouse Inc,United States of America,12293409893.45,25301040,Restaurants
+176,JMT.LS,Jeronimo Martins SGPS SA,Portugal,12180844133.4813,30101030,Food Retail
+106,SJM.N,J.M. Smucker Co,United States of America,12103169335.6,30202030,Packaged Foods & Meats
+73,COKE.OQ,Coca-Cola Consolidated Inc,United States of America,11824481186.16,30201030,Soft Drinks & Non-alcoholic Beverages
+256,000895.SZ,Henan Shuanghui Investment & Development Co Ltd,China,11781092533.9742,30202030,Packaged Foods & Meats
+149,TACN.NS,Tata Consumer Products Ltd,India,11671647476.1505,30202030,Packaged Foods & Meats
+228,SAP.TO,Saputo Inc,Canada,11648224948.9049,30202030,Packaged Foods & Meats
+522,BROS.N,Dutch Bros Inc,United States of America,11575686208.84,25301040,Restaurants
+370,MRCO.NS,Marico Ltd,India,11515430959.6593,30202030,Packaged Foods & Meats
+549,MICCT.AS,Magnum Ice Cream Company NV,Netherlands,11486918100.969,30202030,Packaged Foods & Meats
+169,JOPH.AM,Jordan Phosphate Mines Company PSC,Jordan,11362994350.2825,15101030,Fertilizers & Agricultural Chemicals
+438,CART.OQ,Maplebear Inc,United States of America,11300233457.12,30101030,Food Retail
+296,YAR.OL,Yara International ASA,Norway,11232352300.3847,15101030,Fertilizers & Agricultural Chemicals
+396,BJ.N,BJ's Wholesale Club Holdings Inc,United States of America,11175777742.24,30101040,Consumer Staples Merchandise Retail
+378,002311.SZ,Guangdong Haid Group Co Ltd,China,11044457966.6147,30202030,Packaged Foods & Meats
+58,ORK.OL,Orkla ASA,Norway,10964001503.9882,30202030,Packaged Foods & Meats
+1,LOTB.BR,Lotus Bakeries NV,Belgium,10642064910.2536,30202030,Packaged Foods & Meats
+23,MKS.L,Marks and Spencer Group PLC,United Kingdom,10599962088.6279,30101030,Food Retail
+134,SHPJ.J,Shoprite Holdings Ltd,South Africa,10516319751.025,30101030,Food Retail
+219,DPZ.OQ,Domino's Pizza Inc,United States of America,10415621971.8,25301040,Restaurants
+366,SDGU.KL,SD Guthrie Bhd,Malaysia,10406730601.9474,30202010,Agricultural Products & Services
+516,2097.HK,MIXUE Group,Hong Kong,10369479444.5082,25301040,Restaurants
+232,MOWI.OL,Mowi ASA,Norway,10105537644.151,30202030,Packaged Foods & Meats
+38,2801.T,Kikkoman Corp,Japan,10065563235.4248,30202030,Packaged Foods & Meats
+25,SBRY.L,J Sainsbury PLC,United Kingdom,10054479008.4116,30101030,Food Retail
+105,SFD.OQ,Smithfield Foods Inc,United States of America,9848735892.89,30202030,Packaged Foods & Meats
+323,BIMAS.IS,BIM Birlesik Magazalar AS,Turkey,9592587371.36193,30101030,Food Retail
+195,DAR.N,Darling Ingredients Inc,United States of America,9254340347.49,30202010,Agricultural Products & Services
+235,7550.T,Zensho Holdings Co Ltd,Japan,9221192912.57943,25301040,Restaurants
+130,BIDJ.J,Bid Corporation Ltd,South Africa,9189847515.73877,30101020,Food Distributors
+546,PRMB.N,Primo Brands Corp,United States of America,9035427193.8,30201030,Soft Drinks & Non-alcoholic Beverages
+109,TTC.N,Toro Co,United States of America,9011570802.42,20106015,Agricultural & Farm Machinery
+12,EXHO.PA,Sodexo SA,France,9007917547.50438,25301040,Restaurants
+377,2587.T,Suntory Beverage & Food Ltd,Japan,8948399037.57172,30201030,Soft Drinks & Non-alcoholic Beverages
+64,KESKOB.HE,Kesko Oyj,Finland,8940103310.17126,30101030,Food Retail
+299,2319.HK,China Mengniu Dairy Company Ltd,Hong Kong,8700407644.87292,30202030,Packaged Foods & Meats
+158,AGCO.N,AGCO Corp,United States of America,8236469946.25,20106015,Agricultural & Farm Machinery
+414,603156.SS,Hebei Yangyuan ZhiHui Beverage Co Ltd,China,8214603971.86681,30202030,Packaged Foods & Meats
+250,BARN.S,Barry Callebaut AG,Switzerland,8143260999.00597,30202030,Packaged Foods & Meats
+463,CAVA.N,CAVA Group Inc,United States of America,8122886717.44,25301040,Restaurants
+85,CELH.OQ,Celsius Holdings Inc,United States of America,8103799412.0,30201030,Soft Drinks & Non-alcoholic Beverages
+208,0322.HK,Tingyi (Cayman Islands) Holding Corp,Hong Kong,8066041159.34045,30202030,Packaged Foods & Meats
+547,TALABAT.DU,Talabat Holding PLC,United Arab Emirates,7925915046.08201,25301040,Restaurants
+496,6862.HK,Haidilao International Holding Ltd,Hong Kong,7911373809.25055,25301040,Restaurants
+395,SFM.OQ,Sprouts Farmers Market Inc,United States of America,7908185271.09,30101030,Food Retail
+236,2912.TW,President Chain Store Corp,Taiwan,7801375123.14734,30101030,Food Retail
+233,600096.SS,Yunnan Yuntianhua Co Ltd,China,7776705535.4285,15101030,Fertilizers & Agricultural Chemicals
+285,600426.SS,Shandong Hualu-Hengsheng Chemical Co Ltd,China,7750291759.51512,15101030,Fertilizers & Agricultural Chemicals
+81,EMPa.TO,Empire Company Ltd,Canada,7732888471.12473,30101030,Food Retail
+540,SPEE.KL,99 Speed Mart Retail Holdings Bhd,Malaysia,7559380378.65749,30101040,Consumer Staples Merchandise Retail
+528,ZAB.WA,Zabka Group SA,Poland,7542450395.99178,30101030,Food Retail
+71,EAT.N,Brinker International Inc,United States of America,7518229587.0,25301040,Restaurants
+53,2875.T,Toyo Suisan Kaisha Ltd,Japan,7411907654.63631,30202030,Packaged Foods & Meats
+462,SWIG.NS,Swiggy Ltd,India,7274496070.61684,25301040,Restaurants
+436,DNP.WA,Dino Polska SA,Poland,7215710511.56833,30101030,Food Retail
+481,3563.T,Food & Life Companies Ltd,Japan,7061967379.90005,25301040,Restaurants
+467,ACI.N,Albertsons Companies Inc,United States of America,6925466901.22,30101030,Food Retail
+102,PPC.OQ,Pilgrims Pride Corp,United States of America,6845014242.57,30202030,Packaged Foods & Meats
+62,CPB.OQ,Campbell's Co,United States of America,6828922964.7,30202030,Packaged Foods & Meats
+363,2269.T,Meiji Holdings Co Ltd,Japan,6824751681.16479,30202030,Packaged Foods & Meats
+416,MCH.HM,Masan Consumer Corp,Vietnam,6803339686.68264,30202030,Packaged Foods & Meats
+14,GL9.I,Glanbia PLC,Ireland,6757885583.38005,30202030,Packaged Foods & Meats
+391,MOS.N,Mosaic Co,United States of America,6712921121.28,15101030,Fertilizers & Agricultural Chemicals
+75,CAG.N,Conagra Brands Inc,United States of America,6712473298.68,30202030,Packaged Foods & Meats
+67,IOIB.KL,IOI Corporation Bhd,Malaysia,6691642893.61938,30202010,Agricultural Products & Services
+537,1364.HK,Guming Holdings Ltd,Hong Kong,6562855249.55048,25301040,Restaurants
+311,SALM.OL,SalMar ASA,Norway,6453430397.57434,30202030,Packaged Foods & Meats
+322,AAK.ST,AAK AB (publ),Sweden,6443982808.23812,30202030,Packaged Foods & Meats
+479,LW.N,Lamb Weston Holdings Inc,United States of America,6421766067.53,30202030,Packaged Foods & Meats
+119,CORF.NS,Coromandel International Ltd,India,6404275374.16501,15101030,Fertilizers & Agricultural Chemicals
+160,ICL.TA,ICL Group Ltd,Israel,6368676123.35526,15101030,Fertilizers & Agricultural Chemicals
+276,2702.T,McDonald's Holdings Company Japan Ltd,Japan,6357208957.9863,25301040,Restaurants
+243,INGR.N,Ingredion Inc,United States of America,6215731642.77,30202010,Agricultural Products & Services
+297,CENCOSUD.SN,Cencosud SA,Chile,6164853798.39508,30101040,Consumer Staples Merchandise Retail
+231,AXFO.ST,Axfood AB,Sweden,6057552329.10892,30101030,Food Retail
+133,KLKK.KL,Kuala Lumpur Kepong Bhd,Malaysia,5955633061.27367,30202010,Agricultural Products & Services
+237,PSMT.OQ,PriceSmart Inc,United States of America,5930463974.05,30101040,Consumer Staples Merchandise Retail
+504,FERTIGLB.AD,Fertiglobe PLC,United Arab Emirates,5876559901.16532,15101030,Fertilizers & Agricultural Chemicals
+258,FCTL.NS,Fertilisers And Chemicals Travancore Ltd,India,5860888830.44344,15101030,Fertilizers & Agricultural Chemicals
+460,300972.SZ,Fujian Wanchen Food Group Co Ltd,China,5854591313.68682,30202030,Packaged Foods & Meats
+278,EMMN.S,Emmi AG,Switzerland,5849692842.94235,30202030,Packaged Foods & Meats
+144,003230.KS,Samyang Foods Inc,Korea; Republic (S. Korea),5702381392.43015,30202030,Packaged Foods & Meats
+117,CPF.BK,Charoen Pokphand Foods PCL,Thailand,5576046612.5,30202030,Packaged Foods & Meats
+257,000893.SZ,Asia Potash International Investment Guangzhou Co Ltd,China,5519768770.93355,15101030,Fertilizers & Agricultural Chemicals
+187,GRUMAB.MX,Gruma SAB de CV,Mexico,5496438270.82427,30202030,Packaged Foods & Meats
+54,2267.T,Yakult Honsha Co Ltd,Japan,5454012641.86563,30202030,Packaged Foods & Meats
+49,2897.T,Nissin Foods Holdings Co Ltd,Japan,5359054571.53433,30202030,Packaged Foods & Meats
+213,UPLL.NS,UPL Ltd,India,5323348063.43747,15101030,Fertilizers & Agricultural Chemicals
+151,UTPS.KL,United Plantations Bhd,Malaysia,5271785541.89329,30202010,Agricultural Products & Services
+139,NESM.KL,Nestle (Malaysia) Bhd,Malaysia,5252753872.63339,30202030,Packaged Foods & Meats
+157,SIGMAFA.MX,Sigma Foods SAB de CV,Mexico,5176943335.0215,30202030,Packaged Foods & Meats
+354,0151.HK,Want Want China Holdings Ltd,Hong Kong,5147061897.50947,30202030,Packaged Foods & Meats
+207,LOUP.PA,Societe LDC SA,France,5108555526.98111,30202030,Packaged Foods & Meats
+245,CCOLA.IS,Coca-Cola Icecek AS,Turkey,5101009639.16621,30201030,Soft Drinks & Non-alcoholic Beverages
+0,COLR.BR,Colruyt Group NV,Belgium,5071259352.17874,30101030,Food Retail
+244,CHDRAUIB.MX,Grupo Comercial Chedraui SAB de CV,Mexico,4930906878.88704,30101030,Food Retail
+145,YSO.LS,Sonae SGPS SA,Portugal,4827657213.45795,30101030,Food Retail
+18,DFIR.SI,DFI Retail Group Holdings Ltd,Singapore,4818996563.2,30101030,Food Retail
+142,FB.PS,San Miguel Food and Beverage Inc,Philippines,4786760770.44256,30202030,Packaged Foods & Meats
+271,600298.SS,Angel Yeast Co Ltd,China,4738202845.02458,30202030,Packaged Foods & Meats
+143,PAFO.NS,Patanjali Foods Ltd,India,4728179186.78583,30202030,Packaged Foods & Meats
+543,CPAXT.BK,CP Axtra PCL,Thailand,4702793956.70475,30101030,Food Retail
+532,AMR.AD,Americana Restaurants International PLC,United Arab Emirates,4701712005.82662,25301040,Restaurants
+168,APOT.AM,Arab Potash Co,Jordan,4701319385.59322,15101030,Fertilizers & Agricultural Chemicals
+246,000876.SZ,New Hope Liuhe Co Ltd,China,4686110379.89078,30202010,Agricultural Products & Services
+190,2579.T,Coca-Cola Bottlers Japan Holdings Inc,Japan,4672402481.62132,30201030,Soft Drinks & Non-alcoholic Beverages
+465,WING.OQ,Wingstop Inc,United States of America,4635252846.13,25301040,Restaurants
+328,3038.T,Kobe Bussan Co Ltd,Japan,4597978900.61077,30101030,Food Retail
+55,2212.T,Yamazaki Baking Co Ltd,Japan,4510573214.51046,30202030,Packaged Foods & Meats
+124,STRS.TA,Strauss Group Ltd,Israel,4487946341.28735,30202030,Packaged Foods & Meats
+315,VNM.HM,Vietnam Dairy Products JSC,Vietnam,4428107508.33048,30202030,Packaged Foods & Meats
+281,600331.SS,Sichuan Hongda Co Ltd,China,4378428474.69603,15101030,Fertilizers & Agricultural Chemicals
+387,ICBP.JK,Indofood CBP Sukses Makmur Tbk PT,Indonesia,4360652282.4576,30202030,Packaged Foods & Meats
+539,TBBB.N,Bbb Foods Inc,United States of America,4303156414.75,30101030,Food Retail
+329,MBRF3.SA,Marfrig Global Foods SA,Brazil,4275244834.11334,30202030,Packaged Foods & Meats
+103,SEB.A,Seaboard Corp,United States of America,4263227295.46,30202030,Packaged Foods & Meats
+459,EDV.AX,Endeavour Group Ltd,Australia,4242302687.31901,30101030,Food Retail
+309,PIIL.NS,PI Industries Ltd,India,4218078145.26365,15101030,Fertilizers & Agricultural Chemicals
+425,3197.T,Skylark Holdings Co Ltd,Japan,4203646671.6022,25301040,Restaurants
+350,0220.HK,Uni-President China Holdings Ltd,Hong Kong,4109087524.38884,30202030,Packaged Foods & Meats
+147,SAE.TA,Shufersal Ltd,Israel,4064203535.87327,30101030,Food Retail
+201,CALM.OQ,Cal-Maine Foods Inc,United States of America,4046434381.08,30202030,Packaged Foods & Meats
+17,CWK.L,Cranswick PLC,United Kingdom,4035638175.3545,30202030,Packaged Foods & Meats
+422,POST.N,Post Holdings Inc,United States of America,4023285959.22,30202030,Packaged Foods & Meats
+50,2809.T,Kewpie Corp,Japan,4017416250.23135,30202030,Packaged Foods & Meats
+412,CHEF.OQ,Chefs' Warehouse Inc,United States of America,4004770944.09,30101020,Food Distributors
+345,002157.SZ,Jiangxi Zhengbang Technology Co Ltd,China,4003220480.41629,30202010,Agricultural Products & Services
+432,INRETC1.LM,InRetail Peru Corp,Peru,3969261375.5,30101040,Consumer Staples Merchandise Retail
+400,601933.SS,Yonghui Superstores Co Ltd,China,3954479622.37613,30101030,Food Retail
+279,FCG.NZ,Fonterra Co-Operative Group Ltd,New Zealand,3900813328.40379,30202030,Packaged Foods & Meats
+338,FRLD.SI,First Resources Ltd,Singapore,3898275840.75221,30202010,Agricultural Products & Services
+448,603345.SS,Anjoy Foods Group Co Ltd,China,3894962623.37044,30202030,Packaged Foods & Meats
+164,SMG.N,Scotts Miracle-Gro Co,United States of America,3885971572.23,15101030,Fertilizers & Agricultural Chemicals
+161,CAKE.OQ,Cheesecake Factory Inc,United States of America,3862540119.62,25301040,Restaurants
+369,MSN.HM,Masan Group Corp,Vietnam,3833004228.34646,30202030,Packaged Foods & Meats
+419,SHEN.SI,Sheng Siong Group Ltd,Singapore,3805391633.12694,30101030,Food Retail
+264,600226.SS,Zhejiang Hengtong Holding Co Ltd,China,3752237037.37157,15101030,Fertilizers & Agricultural Chemicals
+383,COCO.OQ,Vita Coco Company Inc,United States of America,3743733748.65,30201030,Soft Drinks & Non-alcoholic Beverages
+45,2282.T,NH Foods Ltd,Japan,3672351286.32241,30202030,Packaged Foods & Meats
+488,271560.KS,Orion Corp,Korea; Republic (S. Korea),3663312607.43774,30202030,Packaged Foods & Meats
+217,600737.SS,COFCO Sugar Holding Co Ltd,China,3620683990.63797,30202030,Packaged Foods & Meats
+298,ATM.NZ,A2 Milk Company Ltd,New Zealand,3603471605.00485,30202030,Packaged Foods & Meats
+529,OLAG.SI,Olam Group Ltd,Singapore,3598743400.81269,30101020,Food Distributors
+47,2002.T,Nisshin Seifun Group Inc,Japan,3565341530.71442,30202030,Packaged Foods & Meats
+43,2871.T,Nichirei Corp,Japan,3495115990.70578,30202030,Packaged Foods & Meats
+266,QRES.KL,QL Resources Bhd,Malaysia,3464684525.42415,30202030,Packaged Foods & Meats
+125,ESCO.NS,Escorts Kubota Ltd,India,3436005787.51441,20106015,Agricultural & Farm Machinery
+505,6186.HK,China Feihe Ltd,Hong Kong,3414476542.09674,30202030,Packaged Foods & Meats
+26,TATE.L,Tate & Lyle PLC,United Kingdom,3340144373.41831,30202030,Packaged Foods & Meats
+69,PEPT.KL,PPB Group Bhd,Malaysia,3309020399.0509,30202030,Packaged Foods & Meats
+129,GUBRF.IS,Gubre Fabrikalari TAS,Turkey,3265634144.57018,15101030,Fertilizers & Agricultural Chemicals
+192,INDF.JK,Indofood Sukses Makmur Tbk PT,Indonesia,3258790485.82152,30202030,Packaged Foods & Meats
+333,AMRT.JK,Sumber Alfaria Trijaya Tbk PT,Indonesia,3220832909.17431,30101030,Food Retail
+7,EBRO.MC,Ebro Foods SA,Spain,3185983315.06755,30202030,Packaged Foods & Meats
+211,PBH.TO,Premium Brands Holdings Corp,Canada,3146949433.15022,30202030,Packaged Foods & Meats
+375,JUBI.NS,Jubilant Foodworks Ltd,India,3136691893.35517,25301040,Restaurants
+92,MZTI.OQ,Marzetti Co,United States of America,3115413420.0,30202030,Packaged Foods & Meats
+166,SORIANAB.MX,Organizacion Soriana SAB de CV,Mexico,3113745781.00639,30101040,Consumer Staples Merchandise Retail
+499,1797.HK,East Buy Holding Ltd,Hong Kong,3102849410.32174,30101030,Food Retail
+283,600598.SS,Heilongjiang Agriculture Co Ltd,China,3074710591.27241,30202010,Agricultural Products & Services
+100,FIZZ.OQ,National Beverage Corp,United States of America,3040521072.96,30201030,Soft Drinks & Non-alcoholic Beverages
+8,VIS.MC,Viscofan SA,Spain,3036390468.23699,30202030,Packaged Foods & Meats
+284,600486.SS,Jiangsu Yangnong Chemical Co Ltd,China,2995118214.48759,15101030,Fertilizers & Agricultural Chemicals
+60,TBSJ.J,Tiger Brands Ltd,South Africa,2974058482.68537,30202030,Packaged Foods & Meats
+489,B4B0n.H,METRO AG,Germany,2948426939.43059,30101020,Food Distributors
+184,FAUF.PSX,Fauji Fertilizer Company Ltd,Pakistan,2944401653.83194,15101030,Fertilizers & Agricultural Chemicals
+108,TR.N,Tootsie Roll Industries Inc,United States of America,2924035131.8,30202030,Packaged Foods & Meats
+373,002299.SZ,Fujian Sunner Development Co Ltd,China,2899565696.66147,30202030,Packaged Foods & Meats
+120,CPIN.JK,Charoen Pokphand Indonesia Tbk PT,Indonesia,2899396163.46956,30202010,Agricultural Products & Services
+252,600186.SS,Lotus Holdings Co Ltd,China,2873849168.38255,30202030,Packaged Foods & Meats
+224,UNFI.N,United Natural Foods Inc,United States of America,2859529365.0,30101020,Food Distributors
+341,DIDA.MC,Distribuidora Internacional de Alimentacion SA,Spain,2826131250.3861,30101040,Consumer Staples Merchandise Retail
+42,2264.T,Morinaga Milk Industry Co Ltd,Japan,2788122634.24024,30202030,Packaged Foods & Meats
+19,0142.HK,First Pacific Co Ltd,Hong Kong,2755645911.85967,30202030,Packaged Foods & Meats
+96,MFI.TO,Maple Leaf Foods Inc,Canada,2699056888.02028,30202030,Packaged Foods & Meats
+5,SDFGn.DE,K+S AG,Germany,2691558167.39887,15101030,Fertilizers & Agricultural Chemicals
+178,JFC.PS,Jollibee Foods Corp,Philippines,2682411662.5635,25301040,Restaurants
+261,GAGR.SI,Golden Agri-Resources Ltd,Singapore,2682354209.9675,30202010,Agricultural Products & Services
+503,KWSG.DE,KWS SAAT SE & Co KgaA,Germany,2681120556.85514,30202010,Agricultural Products & Services
+451,FRPT.OQ,Freshpet Inc,United States of America,2678773537.41,30202030,Packaged Foods & Meats
+68,FRAS.KL,Fraser & Neave Holdings Bhd,Malaysia,2673055020.81141,30201030,Soft Drinks & Non-alcoholic Beverages
+544,LULU.AD,Lulu Retail Holdings PLC,United Arab Emirates,2668844254.28828,30101040,Consumer Staples Merchandise Retail
+476,002895.SZ,Guizhou Chanhen Chemical Corp,China,2626658665.66815,15101030,Fertilizers & Agricultural Chemicals
+291,605198.SS,Yantai North Andre Juice Co Ltd,China,2592251192.18422,30202030,Packaged Foods & Meats
+6,SZUG.DE,Suedzucker AG,Germany,2576901020.73373,30202030,Packaged Foods & Meats
+153,KENT.IS,Kent Gida Maddeleri Sanayii ve Ticaret AS,Turkey,2565712747.82453,30202030,Packaged Foods & Meats
+313,2229.T,Calbee Inc,Japan,2544079549.63292,30202030,Packaged Foods & Meats
+312,AWLA.NS,AWL Agri Business Ltd,India,2514178403.35119,30202030,Packaged Foods & Meats
+138,MGROS.IS,Migros Ticaret AS,Turkey,2507906677.86977,30101030,Food Retail
+371,BAKKA.OL,P/F Bakkafrost,Norway,2504295392.55646,30202030,Packaged Foods & Meats
+254,000833.SZ,Guangxi Yuegui Guangye Holdings Co Ltd,China,2484147839.05555,30202030,Packaged Foods & Meats
+197,2222.T,Kotobuki Spirits Co Ltd,Japan,2483389645.08606,30202030,Packaged Foods & Meats
+427,SUMH.NS,Sumitomo Chemical India Ltd,India,2476891017.25128,15101030,Fertilizers & Agricultural Chemicals
+439,301035.SZ,Shandong Weifang Rainbow Chemical Co Ltd,China,2473532069.74416,15101030,Fertilizers & Agricultural Chemicals
+46,1332.T,Nissui Corp,Japan,2457717006.66296,30202030,Packaged Foods & Meats
+268,LSG.OL,Leroy Seafood Group ASA,Norway,2405320170.8185,30202030,Packaged Foods & Meats
+302,PFD.L,Premier Foods PLC,United Kingdom,2349888925.59217,30202030,Packaged Foods & Meats
+56,SCHO.CO,Schouw & Co A/S,Denmark,2349681606.66177,30202030,Packaged Foods & Meats
+456,SHAK.N,Shake Shack Inc,United States of America,2349561133.32,25301040,Restaurants
+380,002312.SZ,Sichuan Development Lomon Co Ltd,China,2339699095.36903,15101030,Fertilizers & Agricultural Chemicals
+191,MTS.AX,Metcash Ltd,Australia,2338999945.95475,30101020,Food Distributors
+478,3549.T,Kusuri No Aoki Holdings Co Ltd,Japan,2338365776.5439,30101040,Consumer Staples Merchandise Retail
+548,417A.T,Blue Zones Holdings Co Ltd,Japan,2330038902.18397,30101030,Food Retail
+519,2419.HK,DEKON Food and Agriculture Group,Hong Kong,2329331492.71204,30202030,Packaged Foods & Meats
+527,2460.HK,China Resources Beverage (Holdings) Co Ltd,Hong Kong,2318161907.2395,30201030,Soft Drinks & Non-alcoholic Beverages
+209,ANDE.OQ,Andersons Inc,United States of America,2315675808.0,30101020,Food Distributors
+509,PGUN.JK,Pradiksi Gunatama Tbk PT,Indonesia,2313005526.5221,30202030,Packaged Foods & Meats
+545,BOXJ.J,Boxer Retail Ltd,South Africa,2298278465.94872,30101030,Food Retail
+484,301498.SZ,Gambol Pet Group Co Ltd,China,2293165936.93879,30202030,Packaged Foods & Meats
+137,1229.TW,Lien Hwa Industrial Holdings Corp,Taiwan,2287283074.73222,30202030,Packaged Foods & Meats
+533,141A.T,Trial Holdings Inc,Japan,2281286223.70288,30101040,Consumer Staples Merchandise Retail
+517,9985.HK,Weilong Delicious Global Holdings Ltd,Hong Kong,2281047160.44735,30202030,Packaged Foods & Meats
+430,BUMI.SI,Bumitama Agri Ltd,Singapore,2271380730.13465,30202010,Agricultural Products & Services
+31,2206.T,Ezaki Glico Co Ltd,Japan,2264966789.91918,30202030,Packaged Foods & Meats
+473,300761.SZ,Jiangsu Lihua Foods Group Co Ltd,China,2261168542.43089,30202030,Packaged Foods & Meats
+33,2607.T,Fuji Oil Co Ltd (Osaka),Japan,2254469956.56117,30202030,Packaged Foods & Meats
+35,2810.T,House Foods Group Inc,Japan,2248908202.40607,30202030,Packaged Foods & Meats
+319,ASAI3.SA,Sendas Distribuidora SA,Brazil,2238347776.28584,30101040,Consumer Staples Merchandise Retail
+260,000902.SZ,YONFER Agricultural Technology Co Ltd,China,2231163739.33524,15101030,Fertilizers & Agricultural Chemicals
+186,URC.PS,Universal Robina Corp,Philippines,2224599231.99166,30202030,Packaged Foods & Meats
+34,8242.T,H2O Retailing Corp,Japan,2215683906.63212,30101030,Food Retail
+444,603317.SS,Sichuan Teway Food Group Co Ltd,China,2212204661.72314,30202030,Packaged Foods & Meats
+326,HUSQb.ST,Husqvarna AB,Sweden,2207144547.42013,20106015,Agricultural & Farm Machinery
+325,3397.T,TORIDOLL Holdings Corp,Japan,2204256782.97242,25301040,Restaurants
+288,2050.SE,Savola Group Company SJSC,Saudi Arabia,2201922820.84743,30202030,Packaged Foods & Meats
+393,605296.SS,Yunnan Shennong Agricultural Industry Group Co Ltd,China,2198427199.38175,30202030,Packaged Foods & Meats
+131,GNC.L,Greencore Group PLC,United Kingdom,2190722153.68424,30202030,Packaged Foods & Meats
+220,BAFARB.BIV,Grupo Bafar SAB de CV,Mexico,2166628625.35337,30202030,Packaged Foods & Meats
+175,MYOR.JK,Mayora Indah Tbk PT,Indonesia,2150711733.34723,30202030,Packaged Foods & Meats
+324,3387.T,Create Restaurants Holdings Inc,Japan,2116543707.31075,25301040,Restaurants
+199,600872.SS,Jonjee Hi-tech Industrial and Commercial Holding Co Ltd,China,2110860010.86937,30202030,Packaged Foods & Meats
+511,ECOO.KL,Eco-Shop Marketing Bhd,Malaysia,2109102600.94173,30101040,Consumer Staples Merchandise Retail
+290,MAB.L,Mitchells & Butlers PLC,United Kingdom,2100926161.72355,25301040,Restaurants
+372,MFPC.CA,Misr Fertilizers Production Company SAE,Egypt,2097621434.14898,15101030,Fertilizers & Agricultural Chemicals
+20,GRG.L,Greggs PLC,United Kingdom,2097608479.84146,25301040,Restaurants
+275,HAPL.NS,Hatsun Agro Product Ltd,India,2093446087.24185,30202030,Packaged Foods & Meats
+2,SPAB.BR,"Societe de Services de Participations, de Direction et d'Elaboration SA",Belgium,2089110315.39931,30201030,Soft Drinks & Non-alcoholic Beverages
+218,000422.SZ,Hubei Yihua Chemical Industry Co Ltd,China,2087629853.16336,15101030,Fertilizers & Agricultural Chemicals
+122,DPFE.NS,Deepak Fertilisers and Petrochemicals Corp Ltd,India,2085921582.60824,15101030,Fertilizers & Agricultural Chemicals
+59,AVIJ.J,Avi Ltd,South Africa,2080777067.78763,30202030,Packaged Foods & Meats
+346,097950.KS,CJ CheilJedang Corp,Korea; Republic (S. Korea),2076203427.2409,30202030,Packaged Foods & Meats
+404,MONDE.PS,Monde Nissin Corp,Philippines,2074336581.78064,30202030,Packaged Foods & Meats
+210,ALICORC1.LM,Alicorp SAA,Peru,2038813059.22284,30202030,Packaged Foods & Meats
+525,CMRY.JK,Cisarua Mountain Dairy Tbk PT,Indonesia,2033855358.9102,30202030,Packaged Foods & Meats
+179,ALG.N,Alamo Group Inc,United States of America,2021891872.88,20106015,Agricultural & Farm Machinery
+249,ALSEA.MX,Alsea SAB de CV,Mexico,2021659576.67175,25301040,Restaurants
+308,SSPG.L,SSP Group PLC,United Kingdom,2013406166.4502,25301040,Restaurants
+534,PMRJ.J,Premier Group Ltd,South Africa,1996981659.29581,30202030,Packaged Foods & Meats
+112,WMK.N,Weis Markets Inc,United States of America,1991692612.53,30101030,Food Retail
+390,OCDO.L,Ocado Group PLC,United Kingdom,1983133259.08707,30101030,Food Retail
+289,PRESCO.LG,Presco PLC,Nigeria,1960182723.67998,30202010,Agricultural Products & Services
+403,002539.SZ,Chengdu Wintrue Holding Co Ltd,China,1952013263.86787,15101030,Fertilizers & Agricultural Chemicals
+194,CSR.CS,Compagnie Sucrerie Marocaine et de Raffinage SA,Morocco,1949197939.56519,30202030,Packaged Foods & Meats
+113,CHMB.NS,Chambal Fertilisers and Chemicals Ltd,India,1947609499.09739,15101030,Fertilizers & Agricultural Chemicals
+181,2593.T,Ito En Ltd,Japan,1944508740.57622,30201030,Soft Drinks & Non-alcoholic Beverages
+114,BAYE.NS,Bayer Cropscience Ltd,India,1942182470.40151,15101030,Fertilizers & Agricultural Chemicals
+182,600827.SS,Shanghai Bailian Group Co Ltd,China,1923139216.96093,30101030,Food Retail
+295,ZYDS.NS,Zydus Wellness Ltd,India,1920671460.44659,30202030,Packaged Foods & Meats
+180,000553.SZ,ADAMA Ltd,China,1914336924.28861,15101030,Fertilizers & Agricultural Chemicals
+474,1579.HK,Yihai International Holding Ltd,Hong Kong,1914306336.63619,30202030,Packaged Foods & Meats
+398,002507.SZ,Chongqing Fuling Zhacai Group Co Ltd,China,1905816158.9425,30202030,Packaged Foods & Meats
+306,2270.SE,Saudia Dairy & Foodstuff Company SJSC,Saudi Arabia,1904178540.04101,30202030,Packaged Foods & Meats
+450,TFG.BK,Thaifoods Group PCL,Thailand,1892060248.08779,30202030,Packaged Foods & Meats
+417,PGOLD.PS,Puregold Price Club Inc,Philippines,1878167114.11929,30101040,Consumer Staples Merchandise Retail
+132,ILCO.TA,Israel Corporation Ltd,Israel,1863821330.52632,15101030,Fertilizers & Agricultural Chemicals
+226,7581.T,Saizeriya Co Ltd,Japan,1860765089.39478,25301040,Restaurants
+241,600113.SS,Zhe Jiang Dong Ri Ltd Co,China,1859317577.85498,30101030,Food Retail
+490,TFMAMA.BK,Thai President Foods PCL,Thailand,1853717697.47444,30202030,Packaged Foods & Meats
+255,SVN.IC,Sildarvinnslan hf,Iceland,1850198141.54801,30202030,Packaged Foods & Meats
+482,TAVE.NS,Travel Food Services Ltd,India,1848813637.92012,25301040,Restaurants
+343,002946.SZ,New Hope Dairy Co Ltd,China,1844664572.27309,30202030,Packaged Foods & Meats
+441,CNPF.PS,Century Pacific Food Inc,Philippines,1842763483.62397,30202030,Packaged Foods & Meats
+385,002385.SZ,Beijing Dabeinong Technology Group Co Ltd,China,1841968472.95169,30202010,Agricultural Products & Services
+458,002847.SZ,Yankershop Food Co Ltd,China,1837070952.30812,30202030,Packaged Foods & Meats
+83,FLO.N,Flowers Foods Inc,United States of America,1823141778.0,30202030,Packaged Foods & Meats
+214,EXITO.CN,Almacenes Exito SA,Colombia,1809709130.14363,30101040,Consumer Staples Merchandise Retail
+172,NESTLE.LG,Nestle Nigeria PLC,Nigeria,1809492729.6701,30202030,Packaged Foods & Meats
+200,ABUK.CA,Abu Qir Fertilizers and Chemical Industries Co SAE,Egypt,1802827360.62295,15101030,Fertilizers & Agricultural Chemicals
+115,BJC.BK,Berli Jucker PCL,Thailand,1783385181.75586,30101040,Consumer Staples Merchandise Retail
+348,SLU.GQ,Corporacion Favorita CA,Ecuador,1782264981.94,30101030,Food Retail
+389,002458.SZ,Shandong Yisheng Livestock & Poultry Breeding Co Ltd,China,1778088917.06068,30202030,Packaged Foods & Meats
+470,YHNF.TA,M Yochananof and Sons 1988 Ltd,Israel,1767768760.77802,30101030,Food Retail
+513,9858.HK,China Youran Dairy Group Ltd,Hong Kong,1758301063.20186,30202010,Agricultural Products & Services
+471,2296.T,Itoham Yonekyu Holdings Inc,Japan,1756856434.72762,30202030,Packaged Foods & Meats
+89,IMKTA.OQ,Ingles Markets Inc,United States of America,1750141804.64,30101030,Food Retail
+399,TAPG.JK,Triputra Agro Persada Tbk PT,Indonesia,1738546038.3653,30202030,Packaged Foods & Meats
+342,RMLI.TA,Rami Levi Chain Stores Hashikma Marketing 2006 Ltd,Israel,1737025421.39563,30101030,Food Retail
+410,ARCO.N,Arcos Dorados Holdings Inc,United States of America,1735863589.68,25301040,Restaurants
+251,POULA.TN,Poulina Group Holding SA,Tunisia,1732940568.15469,30202030,Packaged Foods & Meats
+506,UIE.CO,UIE PLC,Denmark,1729033587.78626,30202010,Agricultural Products & Services
+376,BIOMAR.CO,Biomar Group A/S,Denmark,1719287809.20892,30202030,Packaged Foods & Meats
+360,ARYN.S,Aryzta AG,Switzerland,1712145314.84462,30202030,Packaged Foods & Meats
+196,000048.SZ,Shenzhen Kingkey Smart Agriculture Times Co Ltd,China,1705321354.182,30202030,Packaged Foods & Meats
+272,000998.SZ,Yuan Long Ping High-Tech Agriculture Co Ltd,China,1693670079.43445,30202010,Agricultural Products & Services
+445,BIKA.NS,Bikaji Foods International Ltd,India,1689625305.79725,30202030,Packaged Foods & Meats
+234,026960.KS,Dong Suh Companies Inc,Korea; Republic (S. Korea),1679338133.2981,30101020,Food Distributors
+229,601038.SS,First Tractor Co Ltd,China,1677906125.13736,20106015,Agricultural & Farm Machinery
+205,CCLP.NS,CCL Products (India) Ltd,India,1664735087.77859,30202030,Packaged Foods & Meats
+502,6658.HK,Liuliumei Co Ltd,Hong Kong,1663319806.16448,30202030,Packaged Foods & Meats
+101,NWC.TO,North West Company Inc,Canada,1655293570.99091,30101030,Food Retail
+331,AUSS.OL,Austevoll Seafood ASA,Norway,1650131199.16554,30202030,Packaged Foods & Meats
+541,GUNDG.IS,Gundogdu Gida Sut Urunleri Sanayi ve Dis Ticaret AS,Turkey,1636891412.16727,30202030,Packaged Foods & Meats
+352,002216.SZ,Sanquan Food Co Ltd,China,1634541544.18112,30202030,Packaged Foods & Meats
+225,000061.SZ,Shenzhen Agricultural Power Group Co Ltd,China,1621652581.75582,30101020,Food Distributors
+127,FRNM.SI,Fraser and Neave Ltd,Singapore,1612429349.04799,30202030,Packaged Foods & Meats
+361,002258.SZ,Lier Chemical Co Ltd,China,1607142784.1611,15101030,Fertilizers & Agricultural Chemicals
+497,GMAT3.SA,Grupo Mateus SA,Brazil,1598887069.54886,30101040,Consumer Staples Merchandise Retail
+384,NOMD.N,Nomad Foods Ltd,United States of America,1595017238.29,30202030,Packaged Foods & Meats
+437,301665.SZ,CAC Nantong Chemical Co Ltd,China,1585803868.46056,15101030,Fertilizers & Agricultural Chemicals
+128,1210.TW,Great Wall Enterprise Co Ltd,Taiwan,1585261394.06526,30202030,Packaged Foods & Meats
+368,OSP.BK,Osotspa PCL,Thailand,1580445730.60734,30201030,Soft Drinks & Non-alcoholic Beverages
+347,002170.SZ,Shenzhen Batian Ecotypic Engineering Co Ltd,China,1574068332.667,15101030,Fertilizers & Agricultural Chemicals
+466,601952.SS,Jiangsu Provincial Agricultural Reclamation and Development Co Ltd,China,1563926752.43619,30202010,Agricultural Products & Services
+397,002515.SZ,Jinzi Ham Co Ltd,China,1559289006.24135,30202030,Packaged Foods & Meats
+37,2811.T,Kagome Co Ltd,Japan,1539402349.75631,30202030,Packaged Foods & Meats
+198,TU.BK,THAI Union Group PCL,Thailand,1535225266.14552,30202030,Packaged Foods & Meats
+394,PRAO.NS,Paradeep Phosphates Ltd,India,1514973757.04791,15101030,Fertilizers & Agricultural Chemicals
+406,002557.SZ,Chacha Food Co Ltd,China,1508615345.27041,30202030,Packaged Foods & Meats
+431,COME.MI,Comer Industries SpA,Italy,1505867926.96738,20106015,Agricultural & Farm Machinery
+495,DEVY.NS,Devyani International Ltd,India,1504029232.66244,25301040,Restaurants
+349,KER.WA,Kernel Holding SA,Poland,1503526824.98805,30202010,Agricultural Products & Services
+468,605016.SS,Shandong Bailong Chuangyuan Bio-Tech Co Ltd,China,1500529779.84514,30202030,Packaged Foods & Meats
+146,ITC.BK,i-Tail Corporation PCL,Thailand,1497294046.90319,30202030,Packaged Foods & Meats
+402,300159.SZ,Xinjiang Machinery Research Institute Co Ltd,China,1496658666.61613,20106015,Agricultural & Farm Machinery
+515,FAPA.JK,FAP Agri Tbk PT,Indonesia,1493335964.41479,30202010,Agricultural Products & Services
+121,CENTEL.BK,Central Plaza Hotel PCL,Thailand,1491656644.61816,25301040,Restaurants
+365,CLOEb.ST,Cloetta AB,Sweden,1486665425.42131,30202030,Packaged Foods & Meats
+78,WEN.OQ,Wendy's Co,United States of America,1481939379.2,25301040,Restaurants
+44,2001.T,Nippn Corp,Japan,1479288489.66624,30202030,Packaged Foods & Meats
+367,2270.T,Megmilk Snow Brand Co Ltd,Japan,1478821232.18582,30202030,Packaged Foods & Meats
+483,4161.SE,BinDawood Holding Company SJSC,Saudi Arabia,1478548030.57338,30101040,Consumer Staples Merchandise Retail
+415,139480.KS,E-Mart Inc,Korea; Republic (S. Korea),1478314895.89801,30101040,Consumer Staples Merchandise Retail
+530,GYG.AX,Guzman Y Gomez Ltd,Australia,1474722600.26188,25301040,Restaurants
+447,BFG.MI,BF SpA,Italy,1474552558.77272,30202010,Agricultural Products & Services
+247,1722.TW,Taiwan Fertilizer Co Ltd,Taiwan,1466216216.21622,15101030,Fertilizers & Agricultural Chemicals
+449,CBG.BK,Carabao Group PCL,Thailand,1458208057.727,30201030,Soft Drinks & Non-alcoholic Beverages
+206,600882.SS,Shanghai Milkground Food Tech Co Ltd,China,1457317585.93193,30202030,Packaged Foods & Meats
+337,ILV.MV,Illovo Sugar (Malawi) plc,Malawi,1455052263.39333,30202030,Packaged Foods & Meats
+140,004370.KS,Nongshim Co Ltd,Korea; Republic (S. Korea),1454466215.7342,30202030,Packaged Foods & Meats
+41,2201.T,Morinaga & Co Ltd,Japan,1452194228.34845,30202030,Packaged Foods & Meats
+82,FMC.N,FMC Corp,United States of America,1449275038.59,15101030,Fertilizers & Agricultural Chemicals
+90,JJSF.OQ,J&J Snack Foods Corp,United States of America,1442700292.88,30202030,Packaged Foods & Meats
+424,TTEN3.SA,Tres Tentos Agroindustrial SA,Brazil,1442577971.42746,30202010,Agricultural Products & Services
+491,282330.KS,BGF Retail Co Ltd,Korea; Republic (S. Korea),1431667753.7486,30101030,Food Retail
+29,BELL.S,Bell Food Group AG,Switzerland,1423032711.72962,30202030,Packaged Foods & Meats
+443,603027.SS,Qianhe Condiment and Food Co Ltd,China,1416840679.87164,30202030,Packaged Foods & Meats
+277,BRIMH.IC,Brim hf,Iceland,1400574147.0284,30202030,Packaged Foods & Meats
+123,EIDP.NS,E I D-Parry (India) Ltd,India,1399915622.98773,15101030,Fertilizers & Agricultural Chemicals
+413,002588.SZ,Stanley Agriculture Group Co Ltd,China,1395482526.48159,15101030,Fertilizers & Agricultural Chemicals
+310,LTOL.NS,LT Foods Ltd,India,1388793355.02673,30202030,Packaged Foods & Meats
+407,AGRO.N,Adecoagro SA,United States of America,1388247442.92,30202030,Packaged Foods & Meats
+40,8194.T,Life Corp,Japan,1386920688.50639,30101030,Food Retail
+248,007070.KS,GS Retail Co Ltd,Korea; Republic (S. Korea),1383424100.50201,30101030,Food Retail
+222,DMC.N,Del Monte Corp,United States of America,1379721661.0,30202010,Agricultural Products & Services
+340,1866.HK,China XLX Fertiliser Ltd,Hong Kong,1371934555.00721,15101030,Fertilizers & Agricultural Chemicals
+520,603057.SS,Ziyan Foods Group Co Ltd,China,1368766155.38611,30202030,Packaged Foods & Meats
+162,JPFA.JK,Japfa Comfeed Indonesia Tbk PT,Indonesia,1362721277.18043,30202030,Packaged Foods & Meats
+204,AVNT.NS,Avanti Feeds Ltd,India,1361456489.31754,30202030,Packaged Foods & Meats
+518,DOLE.N,Dole PLC,United States of America,1351257090.0,30202030,Packaged Foods & Meats
+86,9861.T,Yoshinoya Holdings Co Ltd,Japan,1337629086.19903,25301040,Restaurants
+356,4001.SE,Abdullah Al-Othaim Markets Company SJSC,Saudi Arabia,1335055527.44414,30101040,Consumer Staples Merchandise Retail
+358,002251.SZ,Better Life Commercial Chain Share Co Ltd,China,1329824676.16216,30101030,Food Retail
+239,PODR.ZA,Podravka Inc,Croatia,1327674932.79032,30202030,Packaged Foods & Meats
+165,SFBT.TN,Societe de Fabrication des Boissons de Tunisie SA,Tunisia,1325857688.5039,30201030,Soft Drinks & Non-alcoholic Beverages
+267,FEMP.SI,Food Empire Holdings Ltd,Singapore,1323401767.74493,30202030,Packaged Foods & Meats
+282,5903.TWO,Taiwan Familymart Co Ltd,Taiwan,1313631211.85702,30101030,Food Retail
+423,603599.SS,Anhui Guangxin Agrochemical Co Ltd,China,1310453409.7948,15101030,Fertilizers & Agricultural Chemicals
+135,9869.T,Kato Sangyo Co Ltd,Japan,1308532296.87211,30101020,Food Distributors
+286,600597.SS,Bright Dairy & Food Co Ltd,China,1306764070.08567,30202030,Packaged Foods & Meats
+405,6808.HK,Sun Art Retail Group Ltd,Hong Kong,1301801908.89731,30101040,Consumer Staples Merchandise Retail
+492,BHa.N,Biglari Holdings Inc,United States of America,1296424015.56,25301040,Restaurants
+270,2659.T,San-A Co Ltd,Japan,1292367411.3147,30101030,Food Retail
+351,002215.SZ,Shenzhen Noposion Crop Science Co Ltd,China,1280673711.92628,15101030,Fertilizers & Agricultural Chemicals
+171,9948.T,Arcs Co Ltd,Japan,1278618517.24351,30101030,Food Retail
+475,002891.SZ,Yantai China Pet Foods Co Ltd,China,1273679072.69997,30202030,Packaged Foods & Meats
+339,SLCE3.SA,SLC Agricola SA,Brazil,1272463976.81317,30202010,Agricultural Products & Services
+253,6010.SE,National Agricultural Development Company SJSC,Saudi Arabia,1270858025.51333,30202010,Agricultural Products & Services
+335,002100.SZ,Tecon Biology Co Ltd,China,1270113577.11897,30202010,Agricultural Products & Services
+223,BJRI.OQ,BJ's Restaurants Inc,United States of America,1266374755.62,25301040,Restaurants
+173,BACH.NS,Balrampur Chini Mills Ltd,India,1266075048.55383,30202030,Packaged Foods & Meats
+183,ENGO.PSX,Engro Holdings Limited,Pakistan,1263577239.74748,15101030,Fertilizers & Agricultural Chemicals
+523,YSWY.OQ,Yesway Inc,United States of America,1263262992.53,30101030,Food Retail
+408,BGA.AX,Bega Cheese Ltd,Australia,1259618701.69459,30202030,Packaged Foods & Meats
+411,TABGD.IS,Tab Gida Sanayi ve Ticaret AS,Turkey,1255186550.29968,25301040,Restaurants
+542,SPINNEYS.DU,Spinneys 1961 Holding PLC,United Arab Emirates,1254628621.21542,30101030,Food Retail
+401,BTG.BK,Betagro PCL,Thailand,1250697534.57607,30202030,Packaged Foods & Meats
+374,CBO.AX,Cobram Estate Olives Ltd,Australia,1247214863.4216,30202030,Packaged Foods & Meats
+262,7616.T,Colowide Co Ltd,Japan,1245865675.10025,25301040,Restaurants
+382,FATF.PSX,Fatima Fertilizer Company Ltd,Pakistan,1243834532.3741,15101030,Fertilizers & Agricultural Chemicals
+353,3097.T,Monogatari Corp,Japan,1235901245.66599,25301040,Restaurants
+185,MLKP.PSX,Nestle Pakistan Ltd,Pakistan,1234153040.4,30202030,Packaged Foods & Meats
+52,1333.T,Umios Corp,Japan,1233812829.28003,30202030,Packaged Foods & Meats
+330,002053.SZ,Yunnan Energy Investment Co Ltd,China,1223862434.11546,30202030,Packaged Foods & Meats
+332,3983.HK,China BlueChemical Ltd,Hong Kong,1222796077.38118,15101030,Fertilizers & Agricultural Chemicals
+514,2589.HK,Auntea Jenny (Shanghai) Industrial Co Ltd,Hong Kong,1221512550.97747,25301040,Restaurants
+65,GENP.KL,Genting Plantations Bhd,Malaysia,1213540758.54438,30202010,Agricultural Products & Services
+242,000848.SZ,CHENG DE LOLO Co Ltd,China,1213177583.81959,30202030,Packaged Foods & Meats
+300,002004.SZ,Huapont Life Sciences Co Ltd,China,1209506968.91836,15101030,Fertilizers & Agricultural Chemicals
+486,301078.SZ,Kidswant Digital Technology Co Ltd,China,1208164291.55357,30101030,Food Retail
+104,SENEA.OQ,Seneca Foods Corp,United States of America,1207710074.44,30202030,Packaged Foods & Meats
+487,603477.SS,Leshan Giantstar Farming & Husbandry Corp Ltd,China,1198632070.7363,30202010,Agricultural Products & Services
+51,1377.T,Sakata Seed Corp,Japan,1197673861.74348,30202010,Agricultural Products & Services
+446,FEVR.L,Fevertree Drinks PLC,United Kingdom,1192287869.48837,30201030,Soft Drinks & Non-alcoholic Beverages
+485,SMPL.OQ,Simply Good Foods Co,United States of America,1191740446.08,30202030,Packaged Foods & Meats
+273,600389.SS,Nantong Jiangshan Agrochemical & Chemicals Co Ltd,China,1189875540.96623,15101030,Fertilizers & Agricultural Chemicals
+512,AVO.OQ,Mission Produce Inc,United States of America,1187901404.15,30202030,Packaged Foods & Meats
+177,9936.T,Ohsho Food Service Corp,Japan,1182013512.61645,25301040,Restaurants
+259,ZSUG.LZ,Zambia Sugar PLC,Zambia,1181820158.11145,30202030,Packaged Foods & Meats
+510,UTZ.N,UTZ Brands Inc,United States of America,1174110257.76,30202030,Packaged Foods & Meats
+221,0297.HK,Sinofert Holdings Ltd,Hong Kong,1173474758.05374,15101030,Fertilizers & Agricultural Chemicals
+94,LNN.N,Lindsay Corp,United States of America,1171862307.4,20106015,Agricultural & Farm Machinery
+307,MDIA3.SA,M Dias Branco SA Industria e Comercio de Alimentos,Brazil,1150132800.83752,30202030,Packaged Foods & Meats
+66,0506.HK,China Foods Ltd,Hong Kong,1148610548.11074,30201030,Soft Drinks & Non-alcoholic Beverages
+170,PZZA.OQ,Papa John's International Inc,United States of America,1146964208.04,25301040,Restaurants
+420,JOHO.KL,Johor Plantations Group Bhd,Malaysia,1143348905.82739,30202010,Agricultural Products & Services
+477,603363.SS,Fujian Aonong Biological Technology Group Incorporation Ltd,China,1141728086.94321,30202010,Agricultural Products & Services
+317,GODE.NS,Godrej Agrovet Ltd,India,1131291974.91351,30202010,Agricultural Products & Services
+386,002734.SZ,Limin Group Co Ltd,China,1130516608.96753,15101030,Fertilizers & Agricultural Chemicals
+429,603043.SS,Guangzhou Restaurant Group Co Ltd,China,1128956758.38314,25301040,Restaurants
+359,LBV.CS,Label Vie SA,Morocco,1119802601.78409,30101040,Consumer Staples Merchandise Retail
+116,BBRM.NS,"Bombay Burmah Trading Corporation, Ltd",India,1118734888.87724,30202030,Packaged Foods & Meats
+193,600866.SS,Star Lake Bioscience Co Inc Zhaoqing Guangdong,China,1117692150.48724,30202030,Packaged Foods & Meats
+48,2602.T,Nisshin OilliO Group Ltd,Japan,1114606464.40866,30202030,Packaged Foods & Meats
+148,SOPS.KL,Sarawak Oil Palms Bhd,Malaysia,1110971649.46644,30202010,Agricultural Products & Services
+77,CBRL.OQ,Cracker Barrel Old Country Store Inc,United States of America,1106397270.0,25301040,Restaurants
+189,ADES.JK,Akasha Wira International Tbk PT,Indonesia,1096319184.87629,30201030,Soft Drinks & Non-alcoholic Beverages
+381,MEZZ.KW,Mezzan Holding Company KSCP,Kuwait,1092244106.64933,30202030,Packaged Foods & Meats
+3,SIFB.BR,Sipef NV,Belgium,1088897570.14891,30202010,Agricultural Products & Services
+32,8278.T,Fuji Co Ltd,Japan,1086180799.29669,30101030,Food Retail
+442,UNIONCOOP.DU,Union Coop,United Arab Emirates,1085534795.36049,30101040,Consumer Staples Merchandise Retail
+230,600078.SS,Jiangsu ChengXing Phosph Chemicals Co Ltd,China,1083952649.28902,15101030,Fertilizers & Agricultural Chemicals
+174,9956.T,Valor Holdings Co Ltd,Japan,1082481163.24264,30101030,Food Retail
+455,3222.T,United Super Markets Holdings Inc,Japan,1081087854.69801,30101030,Food Retail
+464,003010.SZ,Guangzhou Ruoyuchen Technology Co Ltd,China,1075113565.59013,30101040,Consumer Staples Merchandise Retail
+293,KRIr.AT,Kri-Kri Milk Industry SA,Greece,1074267972.04077,30202030,Packaged Foods & Meats
+274,600305.SS,Jiangsu Hengshun Vinegar Industry Co Ltd,China,1069968854.39397,30202030,Packaged Foods & Meats
+500,FARM.KL,Farm Fresh Bhd,Malaysia,1065879909.71232,30202030,Packaged Foods & Meats
+318,DMP.AX,Domino's Pizza Enterprises Ltd,Australia,1065724515.65033,25301040,Restaurants
+304,HAGA.IC,Hagar hf,Iceland,1064974086.57227,30101040,Consumer Staples Merchandise Retail
+327,PRN.L,Princes Group PLC,United Kingdom,1064880370.36541,30202030,Packaged Foods & Meats
+334,DANGSUG.LG,Dangote Sugar Refinery PLC,Nigeria,1064799541.89872,30202030,Packaged Foods & Meats
+9,SAVEN.PA,Savencia SA,France,1062748064.93313,30202030,Packaged Foods & Meats
+154,2815.T,Ariake Japan Co Ltd,Japan,1062653993.15195,30202030,Packaged Foods & Meats
+494,ISFEL.IC,Isfelag hf,Iceland,1061441468.61029,30202030,Packaged Foods & Meats
+24,MPE.L,M P Evans Group PLC,United Kingdom,1059099996.52847,30202010,Agricultural Products & Services
+227,TREI.NS,Triveni Engineering and Industries Ltd,India,1053528222.12811,30202030,Packaged Foods & Meats
+263,ZHCD.QA,Zad Holding Company QPSC,Qatar,1051838264.66586,30202030,Packaged Foods & Meats
+320,002041.SZ,Shandong Denghai Seeds Co Ltd,China,1050549062.3252,30202010,Agricultural Products & Services
+344,NTML.TA,Neto Malinda Trading Ltd,Israel,1046508622.41829,30202030,Packaged Foods & Meats
+357,6250.T,Yamabiko Corp,Japan,1044952578.93763,20106015,Agricultural & Farm Machinery
+93,LASa.TO,Lassonde Industries Inc,Canada,1043204850.20072,30202030,Packaged Foods & Meats
+167,HERDEZ.MX,Grupo Herdez SAB de CV,Mexico,1042198502.57851,30202030,Packaged Foods & Meats
+150,001800.KS,ORION Holdings Corp,Korea; Republic (S. Korea),1035128333.83975,30202030,Packaged Foods & Meats
+538,0999.HK,Xiaocaiyuan International Holding Ltd,Hong Kong,1034583503.57703,25301040,Restaurants
+136,LES.CS,Lesieur Ste SA,Morocco,1033174349.66081,30202030,Packaged Foods & Meats
+159,JBSS.OQ,John B Sanfilippo & Son Inc,United States of America,1032306368.25,30202030,Packaged Foods & Meats
+118,1215.TW,Charoen Pokphand Enterprise Taiwan Co Ltd,Taiwan,1023449244.20849,30202030,Packaged Foods & Meats
+531,9879.HK,Migao Group Holdings Ltd,Hong Kong,1022335820.03902,15101030,Fertilizers & Agricultural Chemicals
+292,600251.SS,Xinjiang Guannong Co Ltd,China,1007641750.26202,30202010,Agricultural Products & Services
+336,SMTO3.SA,Sao Martinho SA,Brazil,987361662.263236,30202030,Packaged Foods & Meats
+524,4162.SE,Almunajem Foods Company SJSC,Saudi Arabia,985112785.959679,30101020,Food Distributors
+409,SG.N,Sweetgreen Inc,United States of America,919726065.18,25301040,Restaurants
+392,002470.SZ,Kingenta Ecological Engineering Group Co Ltd,China,919046826.301999,15101030,Fertilizers & Agricultural Chemicals
+301,600962.SS,SDIC Zhonglu Fruit Juice Co Ltd,China,907047281.184679,30202030,Packaged Foods & Meats
