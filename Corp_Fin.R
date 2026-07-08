@@ -148,7 +148,7 @@ write.csv(roa_Segment$data, "returnonassets_Segment.csv")
 ggsave("returnon_Segment.png", roa_Segment$plot, width = 10, height = 6, dpi = 100)
 
 
-# 3.2. Indicators of Financialization
+# 3.2. Indicators of Financialisation
 
 # Metric 1: Financial Assets
 
@@ -204,44 +204,44 @@ ggsave("debt_rev_Segment.png", debt_rev_Segment$plot, width = 10, height = 6, dp
 
 # Fixed Effects Model - Has Financialization Reduced Fixed Capital Investment?
 
-# panel_data <- fundamentals %>%
-#   mutate(
-#     Year = year(Date),
-#     # Dependent variable: log(Capital Expenditures)
-#     log_capex = log(Capital.Expenditures...Total),
-#     # Financialization measure 1: Financial assets ratio (crowding-out)
-#     fin = (Cash...Short.Term.Investments + Loans...Receivables...Total) / Total.Assets,
-#     # Financialization measure 2: Shareholder payouts to equity (shareholder-value)
-#     svo = (Dividends.Paid...Cash...Total...Cash.Flow + Common.Stock.Buyback...Net) / Shareholders.Equity...Common,
-#     # Financialization measure 3: Debt to revenue (debt-trap)
-#     dtr = (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Revenue.from.Business.Activities...Total,
-#     # Control: log(Total Assets) as firm-size proxy 
-#     log_ta = log(Total.Assets)
-#   ) %>%
-#   select(Symbol, Year, log_capex, fin, svo, dtr, log_ta) %>%
-#   filter(is.finite(log_capex), is.finite(fin), is.finite(svo), is.finite(dtr),
-#          is.finite(log_ta))
-# 
-# # Convert to pdata.frame (panel data frame required by plm)
-# pdata <- pdata.frame(panel_data, index = c("Symbol", "Year"))
-# 
-# # ============================================================================
-# # 4.2 Two-step Difference GMM (Jibril et al. 2018 approach)
-# # ============================================================================
+panel_data <- fundamentals %>%
+mutate(
+    Year = year(Date),
+    # Dependent variable: log(Capital Expenditures)
+    log_capex = log(Capital.Expenditures...Total / Company.Market.Capitalization),
+    # Financialization measure 1: Financial assets ratio (crowding-out)
+    fin = (Cash...Short.Term.Investments + Loans...Receivables...Total) / Total.Assets,
+    # Financialization measure 2: Shareholder payouts to equity (shareholder-value)
+    svo = (Dividends.Paid...Cash...Total...Cash.Flow + Common.Stock.Buyback...Net) / Shareholders.Equity...Common,
+    # Financialization measure 3: Debt to revenue (debt-trap)
+    dtr = (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Revenue.from.Business.Activities...Total,
+    # Control: log(Total Assets) as firm-size proxy
+    log_ta = log(Total.Assets)
+  ) %>%
+  select(Symbol, Year, log_capex, fin, svo, dtr, log_ta) %>%
+  filter(is.finite(log_capex), is.finite(fin), is.finite(svo), is.finite(dtr),
+         is.finite(log_ta))
+
+# Convert to pdata.frame (panel data frame required by plm)
+pdata <- pdata.frame(panel_data, index = c("Symbol", "Year"))
+
+
+# Two-step Difference GMM
+
 # # - Dependent variable: log(CapEx)
 # # - All RHS variables lagged one period (predetermined)
 # # - Instruments: lagged levels t-2 to t-4 (limits instrument proliferation)
 # # - Two-way effects (firm FE removed by differencing, time dummies included)
 # # - Two-step estimator with Windmeijer (2005) corrected robust SEs
-# 
-# gmm_levels <- pgmm(
-#   log_capex ~ lag(log_capex, 1) + lag(fin, 1) + lag(svo, 1) + lag(dtr, 1) + lag(log_ta, 1)
-#   | lag(log_capex, 2:4) + lag(fin, 2:4) + lag(svo, 2:4) + lag(dtr, 2:4)
-#   + lag(log_ta, 2:4),
-#   data = pdata,
-#   effect = "twoways",
-#   model = "twosteps",
-#   transformation = "d"
-# )
-# 
-# summary(gmm_levels, robust = TRUE)
+
+gmm_levels <- pgmm(
+  log_capex ~ lag(log_capex, 1) + lag(fin, 1) + lag(svo, 1) + lag(dtr, 1) + lag(log_ta, 1)
+  | lag(log_capex, 2:4) + lag(fin, 2:4) + lag(svo, 2:4) + lag(dtr, 2:4)
+  + lag(log_ta, 2:4),
+  data = pdata,
+  effect = "twoways",
+  model = "twosteps",
+  transformation = "d"
+)
+
+summary(gmm_levels, robust = TRUE)
