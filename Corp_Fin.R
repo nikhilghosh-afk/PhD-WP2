@@ -28,7 +28,26 @@ fundamentals <- fundamentals %>%
   mutate(Price = as.numeric(Price)) %>%
   mutate(Company.Market.Capitalization = as.numeric(Company.Market.Capitalization)) %>%
   mutate(across(7:17, as.numeric))
-  
+
+# 2.1 Targeted Data Corrections
+
+# SIGMAFA.MX 2005: market cap recorded as ~2,000 instead of ~2 billion (data provider glitch)
+fundamentals <- fundamentals %>%
+  mutate(Company.Market.Capitalization = ifelse(
+    Symbol == "SIGMAFA.MX" & year(Date) == 2005,
+    NA, Company.Market.Capitalization))
+
+# Turkish lira redenomination (Jan 2005, 6 zeros removed):
+# some pre-2005 values recorded in old TL while the rest of the series is in new TL
+fundamentals <- fundamentals %>%
+  mutate(
+    Total.Assets = ifelse(
+      Symbol %in% c("GUBRF.IS", "KENT.IS") & year(Date) %in% 2000:2003 & Total.Assets > 1e12,
+      NA, Total.Assets),
+    Company.Market.Capitalization = ifelse(
+      Symbol %in% c("GUBRF.IS", "KENT.IS", "MGROS.IS") & year(Date) %in% 2003:2004
+        & Company.Market.Capitalization > 1e10,
+      NA, Company.Market.Capitalization))
 
 fundamentals <- fundamentals %>%
   # filter(!(GICS.Sub.Industry.Name == "Agricultural & Farm Machinery")) %>%
