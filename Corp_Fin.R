@@ -258,46 +258,171 @@ ggsave("debt_rev_Segment.png", debt_rev_Segment$plot, width = 10, height = 6, dp
 
 
 
-# Fixed Effects Model - Has Financialization Reduced Fixed Capital Investment?
+################################################################################
+# 4. INFERENTIAL ANALYSIS: HAS FINANCIALISATION REDUCED FIXED CAPITAL INVESTMENT?
+#
+# Model follows the firm-level financialisation-investment literature:
+#   - Orhangazi (2008, CJE) and Tori & Onaran (2018/2020) for the dynamic
+#     investment (accumulation-rate) equation with an accelerator (sales) and a
+#     profit-rate/internal-funds term;
+#   - Davis (2017, J. Econ. Surveys) and Jibril, Kaltenbrunner & Kesidou (2018)
+#     for the three financialisation channels (crowding-out, shareholder-value,
+#     debt-trap) and the POLS / Fixed-Effects / difference-GMM estimation ladder.
+#
+# Design note: this is a SINGLE sector (agri-food) across MANY countries, so
+# firm fixed effects absorb time-invariant country/firm heterogeneity and a full
+# set of year dummies absorbs common (global) macro shocks.
+#
+# Data note: Refinitiv export does not contain net fixed capital stock (K = net
+# PP&E), operating income, interest paid, or non-operating financial income.
+# The exact Orhangazi/Tori-Onaran I/K accelerator cannot therefore be built
+# verbatim; investment is normalised by total assets (the standard fallback for
+# the accumulation rate) and profitability/demand are proxied by ROA and asset
+# turnover. The three financialisation channels map directly onto Davis (2017).
+################################################################################
+
+library(lmtest)   # coeftest() for robust/clustered inference on the FE model
+
+# ---- 4.1 Build the firm-year panel ------------------------------------------
+# All variables in ratio form so coefficients are comparable across firms and
+# countries. Winsorising (below) tames the extreme balance-sheet outliers that
+# are endemic to firm-level data (Tori & Onaran, 2020, Sec. 4).
+
+winsorise <- function(x, p = 0.01) {
+  q <- quantile(x, probs = c(p, 1 - p), na.rm = TRUE)
+  pmin(pmax(x, q[1]), q[2])
+}
 
 panel_data <- fundamentals %>%
-mutate(
+  mutate(
     Year = year(Date),
-    # Dependent variable: log(Capital Expenditures)
-    log_capex = log(Capital.Expenditures...Total / Company.Market.Capitalization),
-    # Financialization measure 1: Financial assets ratio (crowding-out)
-    fin = (Cash...Short.Term.Investments + Loans...Receivables...Total) / Total.Assets,
-    # Financialization measure 2: Shareholder payouts to equity (shareholder-value)
-    svo = (Dividends.Paid...Cash...Total...Cash.Flow + Common.Stock.Buyback...Net) / Shareholders.Equity...Common,
-    # Financialization measure 3: Debt to revenue (debt-trap)
-    dtr = (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Revenue.from.Business.Activities...Total,
-    # Control: log(Total Assets) as firm-size proxy
+
+    # Dependent variable: rate of fixed capital accumulation (I / K, with total
+    # assets proxying the capital stock). This is the analogue of Orhangazi's
+    # I/K and of Jibril's investment-in-intangibles dependent variable.
+    inv = Capital.Expenditures...Total / Total.Assets,
+
+    # --- Financialisation channel 1: CROWDING-OUT (Davis 2017; Jibril FA/TA) ---
+    # Financial assets as a share of total assets. Higher => firm tilts its
+    # portfolio towards financial rather than productive assets.
+    fa = (Cash...Short.Term.Investments + Loans...Receivables...Total) / Total.Assets,
+
+    # --- Financialisation channel 2: SHAREHOLDER-VALUE (Davis 2017; Jibril) ----
+    # Total payouts (dividends + net buybacks) relative to common equity.
+    svo = (Dividends.Paid...Cash...Total...Cash.Flow + Common.Stock.Buyback...Net) /
+      Shareholders.Equity...Common,
+
+    # --- Financialisation channel 3: DEBT-TRAP (Jibril FL/TA; Tori-Onaran TD/TA)
+    # Total (short + long term) debt relative to total assets.
+    lev = (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Total.Assets,
+
+    # --- Control: profit rate / internal funds (Orhangazi (pi-CD)/K proxy) -----
+    roa = Net.Income.after.Minority.Interest / Total.Assets,
+
+    # --- Control: accelerator / demand (Orhangazi & Tori-Onaran S/K proxy) -----
+    turnover = Revenue.from.Business.Activities...Total / Total.Assets,
+
+    # --- Control: firm size (Jibril log(TA)) ----------------------------------
     log_ta = log(Total.Assets)
   ) %>%
-  select(Instrument, Year, log_capex, fin, svo, dtr, log_ta) %>%
-  filter(is.finite(log_capex), is.finite(fin), is.finite(svo), is.finite(dtr),
-         is.finite(log_ta))
+  select(Instrument, Year, inv, fa, svo, lev, roa, turnover, log_ta) %>%
+  # keep only finite observations (drops firm-years with missing balance-sheet
+  # items or non-positive total assets)
+  filter(if_all(c(inv, fa, svo, lev, roa, turnover, log_ta), is.finite)) %>%
+  # winsorise the continuous variables at the 1st/99th percentiles
+  mutate(across(c(inv, fa, svo, lev, roa, turnover), winsorise))
 
-# Convert to pdata.frame (panel data frame required by plm)
+# Convert to a panel data frame (index = firm, year) for plm / pgmm
 pdata <- pdata.frame(panel_data, index = c("Instrument", "Year"))
 
+# Descriptive statistics of the estimation sample (cf. Jibril et al. Table 3)
+datasummary_skim(panel_data %>% select(inv, fa, svo, lev, roa, turnover, log_ta))
 
-# Two-step Difference GMM
 
-# # - Dependent variable: log(CapEx)
-# # - All RHS variables lagged one period (predetermined)
-# # - Instruments: lagged levels t-2 to t-4 (limits instrument proliferation)
-# # - Two-way effects (firm FE removed by differencing, time dummies included)
-# # - Two-step estimator with Windmeijer (2005) corrected robust SEs
+# ---- 4.2 Fixed-Effects (within) estimator -----------------------------------
+# Static two-way FE (firm + year), following Jibril et al. (Table 6). Firm
+# effects control for time-invariant country/firm heterogeneity; year dummies
+# absorb common global shocks. All regressors lagged one period (predetermined),
+# as investment responds to the balance sheet with a delay.
+#
+# NB: the lagged dependent variable is deliberately EXCLUDED here. In a short-T
+# dynamic panel the within-transformation makes the lagged dependent correlated
+# with the demeaned error (Nickell 1981 bias) - which is precisely why we also
+# estimate the difference-GMM model in 4.3.
 
-gmm_levels <- pgmm(
-  log_capex ~ lag(log_capex, 1) + lag(fin, 1) + lag(svo, 1) + lag(dtr, 1) + lag(log_ta, 1)
-  | lag(log_capex, 2:4) + lag(fin, 2:4) + lag(svo, 2:4) + lag(dtr, 2:4)
-  + lag(log_ta, 2:4),
-  data = pdata,
-  effect = "twoways",
-  model = "twosteps",
+fe_model <- plm(
+  inv ~ lag(fa, 1) + lag(svo, 1) + lag(lev, 1) +
+        lag(roa, 1) + lag(turnover, 1) + lag(log_ta, 1),
+  data   = pdata,
+  model  = "within",
+  effect = "twoways"
+)
+
+# Standard errors clustered by firm and robust to heteroskedasticity and within
+# firm serial correlation (Arellano 1987).
+fe_vcov <- vcovHC(fe_model, method = "arellano", type = "sss", cluster = "group")
+coeftest(fe_model, vcov = fe_vcov)
+
+
+# ---- 4.3 Two-step difference-GMM (Arellano & Bond 1991) ---------------------
+# Dynamic specification adding the lagged dependent variable (investment is a
+# persistent, path-dependent process: Orhangazi 2008; Tori & Onaran 2020).
+#   - transformation = "d"  : first-difference GMM (sweeps out firm effects)
+#   - effect = "twoways"    : includes time dummies for common shocks
+#   - model  = "twosteps"   : efficient two-step estimator
+#   - instruments: lagged LEVELS t-2 to t-4 of all predetermined regressors
+#     (2 <= t <= 4 limits instrument proliferation, as in Jibril et al.)
+#   - summary(robust = TRUE): Windmeijer (2005) finite-sample corrected SEs
+
+gmm_diff <- pgmm(
+  inv ~ lag(inv, 1) + lag(fa, 1) + lag(svo, 1) + lag(lev, 1) +
+        lag(roa, 1) + lag(turnover, 1) + lag(log_ta, 1)
+  | lag(inv, 2:4) + lag(fa, 2:4) + lag(svo, 2:4) + lag(lev, 2:4) +
+        lag(roa, 2:4) + lag(turnover, 2:4) + lag(log_ta, 2:4),
+  data           = pdata,
+  effect         = "twoways",
+  model          = "twosteps",
   transformation = "d"
 )
 
-summary(gmm_levels, robust = TRUE)
+# Coefficients with Windmeijer-corrected robust SEs, plus the identifying
+# diagnostics: Sargan/Hansen test of over-identifying restrictions and the
+# Arellano-Bond AR(1)/AR(2) tests for serial correlation in the residuals.
+# Validity requires: AR(1) significant, AR(2) NOT significant, Sargan not
+# rejected.
+summary(gmm_diff, robust = TRUE)
+
+
+# ---- 4.4 Side-by-side results table -----------------------------------------
+# Fixed-effects (clustered SEs) vs. two-step difference-GMM (Windmeijer SEs).
+# For a two-step pgmm model vcovHC() returns the Windmeijer-corrected matrix.
+
+gmm_vcov <- vcovHC(gmm_diff)
+
+models <- list(
+  "Fixed Effects"   = fe_model,
+  "Difference GMM"  = gmm_diff
+)
+
+modelsummary(
+  models,
+  vcov      = list(fe_vcov, gmm_vcov),   # clustered FE; Windmeijer-corrected GMM
+  stars     = c('*' = 0.1, '**' = 0.05, '***' = 0.01),
+  coef_rename = c(
+    "lag(inv, 1)"      = "Lagged investment (I/K)",
+    "lag(fa, 1)"       = "Financial assets / TA  (crowding-out)",
+    "lag(svo, 1)"      = "Payouts / equity  (shareholder-value)",
+    "lag(lev, 1)"      = "Debt / TA  (debt-trap)",
+    "lag(roa, 1)"      = "Return on assets  (profit rate)",
+    "lag(turnover, 1)" = "Sales / TA  (accelerator)",
+    "lag(log_ta, 1)"   = "log(Total assets)  (size)"
+  ),
+  gof_omit  = "Adj|AIC|BIC|Log|RMSE",
+  title     = "Financialisation and fixed capital investment in the agri-food sector",
+  notes     = "FE: two-way within estimator, firm-clustered robust SEs. Difference GMM: two-step Arellano-Bond, Windmeijer (2005) corrected SEs, instruments = lagged levels t-2..t-4. All regressors lagged one period.",
+  output    = "markdown"
+)
+
+# To export the same table for the paper, swap the output argument, e.g.:
+#   output = "regression_results.docx"   (needs flextable)
+#   output = "regression_results.tex"    (LaTeX, needs kableExtra)
