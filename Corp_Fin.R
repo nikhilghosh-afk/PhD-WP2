@@ -193,17 +193,17 @@ ggsave("investment_Segment.png", invest_Segment$plot, width = 10, height = 6, dp
 roa_Region <- fundamentals %>%
   group_by(Instrument) %>%
   calculate_metrics(Net.Income.after.Minority.Interest * 100 / Total.Assets,
-                    Region, "Fixed Capital Expenditure (% of Market Cap)")
+                    Region, "Annual Return on Total Assets (%)")
 
 roa_Segment <- fundamentals %>%
   calculate_metrics(Net.Income.after.Minority.Interest * 100 / Total.Assets,
-                    Segment, "Fixed Capital Expenditure (% of Market Cap)")
+                    Segment, "Annual Return on Total Assets (%)")
 
 
 write.csv(roa_Region$data, "returnonassets_Region.csv")
 ggsave("returnonassets_Region.png", roa_Region$plot, width = 10, height = 6, dpi = 100)
 write.csv(roa_Segment$data, "returnonassets_Segment.csv")
-ggsave("returnon_Segment.png", roa_Segment$plot, width = 10, height = 6, dpi = 100)
+ggsave("returnonassets_Segment.png", roa_Segment$plot, width = 10, height = 6, dpi = 100)
 
 
 # Metric 1: Financial Assets
