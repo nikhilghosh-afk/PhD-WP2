@@ -294,6 +294,16 @@ winsorise <- function(x, p = 0.01) {
 }
 
 panel_data <- fundamentals %>%
+  # A blank in these two items is structural, not missing: no reported buyback
+  # means the firm repurchased no stock that year, and no reported short-term
+  # debt means it carries none. Code them as 0 (standard Worldscope/Refinitiv
+  # practice) so an otherwise-complete firm-year is not discarded. This alone
+  # roughly doubles the estimation sample. Genuine denominators (total assets,
+  # equity, revenue) are still required below.
+  mutate(
+    Common.Stock.Buyback...Net       = coalesce(Common.Stock.Buyback...Net, 0),
+    Short.Term.Debt...Notes.Payable  = coalesce(Short.Term.Debt...Notes.Payable, 0)
+  ) %>%
   mutate(
     Year = year(Date),
 
