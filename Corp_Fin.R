@@ -117,143 +117,91 @@ count_sample_region <- fundamentals %>%
   summarise(n=n(), .groups = "drop")
 
 # 3 Function to Calculate and Visualise Key Metrics
+#
+# calculate_metrics() takes any grouping variable (Region, Segment, ...) plus a
+# set of NAMED metric expressions, and returns one faceted figure with a panel
+# per metric. Each panel shows the group means plus an overall "Total" line, so
+# the five financialisation indicators are read as one comparable small-multiple
+# rather than as five separate look-alike charts.
+#
+#   ...          named metric expressions; the name becomes the facet (panel) title
+#   group_var    the grouping variable, unquoted (e.g. Region or Segment)
+#   ncol         number of facet columns
 
-calculate_metrics <- function(data, metric, group_var, y_label) {
-  
-  total_df <- data %>%
-    group_by(Date) %>%
-    summarise(a = mean({{metric}}, na.rm = TRUE), .groups = "drop") %>%
-    mutate({{group_var}} := "Total")
-  
-  grouped_df <- data %>%
-    group_by({{group_var}}, Date) %>%
-    summarise(a = mean({{metric}}, na.rm = TRUE), .groups = "drop")
-  
- combined_df <- bind_rows(total_df, grouped_df)
- 
- group_col <- as.character(substitute(group_var))
- group_levels <- sort(unique(combined_df[[group_col]]))
- other_levels <- setdiff(group_levels, "Total")
- 
- set1_colours <- brewer.pal(max(3, length(other_levels)), "Set1")
- colour_values <- setNames(
-   c("black", set1_colours[seq_along(other_levels)]),
-   c("Total", other_levels))
- shape_values <- setNames(
-   c(16, 17:(16 + length(other_levels))),
-   c("Total", other_levels))
- linetype_values <- setNames(
-   c("solid", rep("dashed", length(other_levels))),
-   c("Total", other_levels))
- 
- plot <- combined_df %>%
-   ggplot(aes(x = Date, y = a,
-              colour = {{group_var}},
-              shape = {{group_var}},
-              linetype = {{group_var}})) +
-   geom_line() +
-   geom_point() +
-   scale_x_date(breaks = scales::pretty_breaks(n = 10)) +
-   scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) +
-   scale_colour_manual(values = colour_values) +
-   scale_shape_manual(values = shape_values) +
-   scale_linetype_manual(values = linetype_values) +
-   labs(
-     y = y_label,
-     x = "Date",
-     colour = group_col,
-     shape = group_col,
-     linetype = group_col
-   ) +
-   theme_minimal()
-  
- return(list(data = combined_df, plot = plot))
-  
+calculate_metrics <- function(data, group_var, ..., ncol = 2) {
+
+  metric_quos <- enquos(..., .named = TRUE)      # names -> facet titles
+  group_col   <- as.character(ensym(group_var))
+
+  # For one metric: overall "Total" mean by year + group means by year, stacked.
+  build_one <- function(q, label) {
+    total_df <- data %>%
+      group_by(Date) %>%
+      summarise(a = mean(!!q, na.rm = TRUE), .groups = "drop") %>%
+      mutate(grp = "Total")
+    grouped_df <- data %>%
+      group_by({{ group_var }}, Date) %>%
+      summarise(a = mean(!!q, na.rm = TRUE), .groups = "drop") %>%
+      rename(grp = {{ group_var }})
+    bind_rows(total_df, grouped_df) %>% mutate(metric = label)
+  }
+
+  combined_df <- bind_rows(imap(metric_quos, build_one)) %>%
+    # keep panels in the order the metrics were supplied
+    mutate(metric = factor(metric, levels = names(metric_quos)))
+
+  # Colours: black reference line for "Total"; Okabe-Ito (colour-blind safe) for
+  # the groups, assigned in a fixed order. Total is drawn slightly heavier.
+  other_levels  <- setdiff(sort(unique(combined_df$grp)), "Total")
+  okabe_ito     <- c("#E69F00", "#56B4E9", "#009E73", "#0072B2",
+                     "#D55E00", "#CC79A7", "#F0E442")
+  colour_values <- setNames(c("black", okabe_ito[seq_along(other_levels)]),
+                            c("Total", other_levels))
+  width_values  <- setNames(c(0.9, rep(0.5, length(other_levels))),
+                            c("Total", other_levels))
+
+  plot <- ggplot(combined_df,
+                 aes(x = Date, y = a, colour = grp, linewidth = grp)) +
+    geom_line() +
+    facet_wrap(~ metric, scales = "free_y", ncol = ncol) +
+    scale_x_date(date_breaks = "5 years", date_labels = "%Y") +
+    scale_y_continuous(breaks = scales::breaks_pretty(n = 6)) +
+    scale_colour_manual(values = colour_values) +
+    scale_linewidth_manual(values = width_values, guide = "none") +
+    labs(x = NULL, y = NULL, colour = group_col) +
+    theme_minimal(base_size = 11) +
+    theme(legend.position  = "bottom",
+          panel.grid.minor = element_blank(),
+          strip.text       = element_text(face = "bold"))
+
+  return(list(data = combined_df, plot = plot))
 }
 
-# Investment
+# Five key metrics, faceted into a single figure per grouping. Swap the first
+# argument (Region <-> Segment) to change the grouping; the metrics are identical.
 
+metric_exprs <- rlang::exprs(
+  "Fixed Capital Expenditure (% of Market Cap)"      =
+    Capital.Expenditures...Total * 100 / Company.Market.Capitalization,
+  "Annual Return on Total Assets (%)"                =
+    Net.Income.after.Minority.Interest * 100 / Total.Assets,
+  "Financial Assets / Total Assets (%)"              =
+    (Cash...Short.Term.Investments + Loans...Receivables...Total) * 100 / Total.Assets,
+  "Shareholder Payouts / Total Common Equity (%)"    =
+    (Dividends.Paid...Cash...Total...Cash.Flow + Common.Stock.Buyback...Net) * 100 /
+      Shareholders.Equity...Common,
+  "Total Short and Long Term Debt to Total Revenue (%)" =
+    (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) * 100 /
+      Revenue.from.Business.Activities...Total
+)
 
-invest_Region <- fundamentals %>%
-  group_by(Instrument) %>%
-  calculate_metrics(Capital.Expenditures...Total * 100 / Company.Market.Capitalization,
-                    Region, "Fixed Capital Expenditure (% of Market Cap)")
+metrics_Region  <- calculate_metrics(fundamentals, Region,  !!!metric_exprs)
+metrics_Segment <- calculate_metrics(fundamentals, Segment, !!!metric_exprs)
 
-invest_Segment <- fundamentals %>%
-  calculate_metrics(Capital.Expenditures...Total * 100 / Company.Market.Capitalization,
-                    Segment, "Fixed Capital Expenditure (% of Market Cap)")
-
-write.csv(invest_Region$data, "investment_Region.csv")
-ggsave("investment_Region.png", invest_Region$plot, width = 10, height = 6, dpi = 100)
-write.csv(invest_Segment$data, "investment_Segment.csv")
-ggsave("investment_Segment.png", invest_Segment$plot, width = 10, height = 6, dpi = 100)
-
-# Return on Assets
-
-roa_Region <- fundamentals %>%
-  group_by(Instrument) %>%
-  calculate_metrics(Net.Income.after.Minority.Interest * 100 / Total.Assets,
-                    Region, "Annual Return on Total Assets (%)")
-
-roa_Segment <- fundamentals %>%
-  calculate_metrics(Net.Income.after.Minority.Interest * 100 / Total.Assets,
-                    Segment, "Annual Return on Total Assets (%)")
-
-
-write.csv(roa_Region$data, "returnonassets_Region.csv")
-ggsave("returnonassets_Region.png", roa_Region$plot, width = 10, height = 6, dpi = 100)
-write.csv(roa_Segment$data, "returnonassets_Segment.csv")
-ggsave("returnonassets_Segment.png", roa_Segment$plot, width = 10, height = 6, dpi = 100)
-
-
-# Metric 1: Financial Assets
-
-fin_assets_Region <- fundamentals %>% 
-  calculate_metrics((Cash...Short.Term.Investments + Loans...Receivables...Total) * 100 / Total.Assets, 
-                    Region, "Financial Assets / Total Assets (%)")
-
-
-fin_assets_Segment <- fundamentals %>% 
-  calculate_metrics((Cash...Short.Term.Investments + Loans...Receivables...Total) * 100 / Total.Assets, 
-                    Segment, "Financial Assets / Total Assets (%)")
-
-write.csv(fin_assets_Region$data, "financial_assets_Region.csv")
-ggsave("financial_assets_Region.png", fin_assets_Region$plot, width = 10, height = 6, dpi = 100)
-write.csv(fin_assets_Segment$data, "financial_assets_Segment.csv")
-ggsave("financial_assets_Segment.png", fin_assets_Segment$plot, width = 10, height = 6, dpi = 100)
-
-
-# Metric 2: Shareholder Payouts
-
-share_pay_Region <- fundamentals %>%
-  calculate_metrics((Dividends.Paid...Cash...Total...Cash.Flow + Common.Stock.Buyback...Net)*100 / Shareholders.Equity...Common,
-                    Region, "Shareholder Payouts / Total Common Equity (%)")
-
-
-share_pay_Segment <- fundamentals %>%
-  calculate_metrics((Dividends.Paid...Cash...Total...Cash.Flow + Common.Stock.Buyback...Net)*100 / Shareholders.Equity...Common,
-                    Segment, "Shareholder Payouts / Total Common Equity (%)") 
-
-write.csv(share_pay_Region$data, "share_pay_Region.csv")
-ggsave("share_pay_Region.png", share_pay_Region$plot, width = 10, height = 6, dpi = 100)
-write.csv(share_pay_Segment$data, "share_pay_Segment.csv")
-ggsave("share_pay_Segment.png", share_pay_Segment$plot, width = 10, height = 6, dpi = 100)
-
-
-# Metric 3: Debt to Revenue
-
-debt_rev_Region <- fundamentals %>%
-  calculate_metrics((Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable)*100 / Revenue.from.Business.Activities...Total,
-                    Region, "Total Short and Long Term Debt to Total Revenue (%)")
-
-debt_rev_Segment <- fundamentals %>%
-  calculate_metrics((Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable)*100 / Revenue.from.Business.Activities...Total,
-                    Segment, "Total Short and Long Term Debt to Total Revenue (%)" )
-
-write.csv(debt_rev_Region$data, "debt_rev_Region.csv")
-ggsave("debt_rev_Region.png", debt_rev_Region$plot, width = 10, height = 6, dpi = 100)
-write.csv(debt_rev_Segment$data, "debt_rev_Segment.csv")
-ggsave("debt_rev_Segment.png", debt_rev_Segment$plot, width = 10, height = 6, dpi = 100)
+write.csv(metrics_Region$data,  "metrics_Region.csv",  row.names = FALSE)
+ggsave("metrics_Region.png",  metrics_Region$plot,  width = 11, height = 7, dpi = 150)
+write.csv(metrics_Segment$data, "metrics_Segment.csv", row.names = FALSE)
+ggsave("metrics_Segment.png", metrics_Segment$plot, width = 11, height = 7, dpi = 150)
 
 
 
