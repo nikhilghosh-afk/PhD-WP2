@@ -129,21 +129,33 @@ count_sample_region <- fundamentals %>%
 #   group_var    the grouping variable, unquoted (e.g. Region or Segment)
 #   ncol         number of facet columns
 
-calculate_metrics <- function(data, group_var, ..., ncol = 2) {
+calculate_metrics <- function(data, group_var, ..., ncol = 2, winsor = 0.01) {
 
   metric_quos <- enquos(..., .named = TRUE)      # names -> facet titles
   group_col   <- as.character(ensym(group_var))
 
-  # For one metric: overall "Total" mean by year + group means by year, stacked.
+  # Cap a metric at its winsor / (1 - winsor) quantiles, pooled across all
+  # firm-years, before averaging. This removes the extreme ratios produced by
+  # near-zero or negative denominators - e.g. payouts / equity blows up to
+  # thousands of percent for firms with negative book equity after large
+  # buybacks (McDonald's, Starbucks, Yum, ...). Set winsor = NA to disable.
+  cap <- function(x) {
+    if (is.na(winsor) || winsor <= 0) return(x)
+    qs <- quantile(x, c(winsor, 1 - winsor), na.rm = TRUE)
+    pmin(pmax(x, qs[1]), qs[2])
+  }
+
+  # For one metric: winsorise the firm-year values, then take the overall
+  # "Total" mean by year and the group means by year, and stack them.
   build_one <- function(q, label) {
-    total_df <- data %>%
-      group_by(Date) %>%
-      summarise(a = mean(!!q, na.rm = TRUE), .groups = "drop") %>%
-      mutate(grp = "Total")
-    grouped_df <- data %>%
-      group_by({{ group_var }}, Date) %>%
-      summarise(a = mean(!!q, na.rm = TRUE), .groups = "drop") %>%
-      rename(grp = {{ group_var }})
+    d <- data %>%
+      transmute(Date, grp = {{ group_var }}, value = !!q) %>%
+      filter(is.finite(value)) %>%
+      mutate(value = cap(value))
+    total_df   <- d %>% group_by(Date) %>%
+      summarise(a = mean(value), .groups = "drop") %>% mutate(grp = "Total")
+    grouped_df <- d %>% group_by(grp, Date) %>%
+      summarise(a = mean(value), .groups = "drop")
     bind_rows(total_df, grouped_df) %>% mutate(metric = label)
   }
 
