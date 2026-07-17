@@ -7,6 +7,7 @@ library(scales)
 library(ggrepel)
 library(ggplot2)
 library(RColorBrewer)
+library(ggokabeito)
 library(plm)
 library(modelsummary)
 
@@ -152,9 +153,10 @@ calculate_metrics <- function(data, group_var, ..., ncol = 2) {
 
   # Colours: black reference line for "Total"; Okabe-Ito (colour-blind safe) for
   # the groups, assigned in a fixed order. Total is drawn slightly heavier.
+  # These orders take strong Okabe-Ito hues (skipping yellow, too light on white,
+  # and grey), reserving black for the Total reference line.
   other_levels  <- setdiff(sort(unique(combined_df$grp)), "Total")
-  okabe_ito     <- c("#E69F00", "#56B4E9", "#009E73", "#0072B2",
-                     "#D55E00", "#CC79A7", "#F0E442")
+  okabe_ito     <- unname(palette_okabe_ito(order = c(1, 2, 3, 5, 6, 7)))
   colour_values <- setNames(c("black", okabe_ito[seq_along(other_levels)]),
                             c("Total", other_levels))
   width_values  <- setNames(c(0.9, rep(0.5, length(other_levels))),
@@ -236,8 +238,7 @@ indexed_plot <- ggplot(index_base, aes(Date, index, colour = metric)) +
     nudge_x = 250, segment.colour = NA, min.segment.length = Inf) +
   scale_x_date(date_breaks = "5 years", date_labels = "%Y",
                expand = expansion(mult = c(0.02, 0.28))) +
-  scale_colour_manual(
-    values = c("#000000", "#E69F00", "#56B4E9", "#009E73", "#D55E00")) +
+  scale_colour_okabe_ito(order = c(9, 1, 2, 3, 6)) +   # black, orange, sky, green, vermillion
   labs(x = NULL, y = "Index (base year = 100)",
        title = "Financialisation and fixed investment in agri-food, indexed to base year") +
   guides(colour = "none") +                          # labels replace the legend
