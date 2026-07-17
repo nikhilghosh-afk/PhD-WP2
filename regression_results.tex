@@ -1,0 +1,44 @@
+
+\begin{table}
+\caption{Financialisation and fixed capital investment in the agri-food sector}
+\begin{center}
+\begin{tabular}{l c c}
+\toprule
+ & Fixed Effects & Difference GMM \\
+\midrule
+Lagged investment (I/K)$_{t-1}$      &                & $0.487^{***}$ \\
+                                     &                & $(0.033)$     \\
+Financial assets / TA (crowding-out) & $-0.031^{***}$ & $0.031^{**}$  \\
+                                     & $(0.010)$      & $(0.014)$     \\
+Payouts / equity (shareholder-value) & $-0.005$       & $0.002$       \\
+                                     & $(0.005)$      & $(0.005)$     \\
+Debt / TA (debt-trap)                & $-0.026^{***}$ & $-0.024^{**}$ \\
+                                     & $(0.009)$      & $(0.011)$     \\
+Return on assets (profit rate)       & $0.114^{***}$  & $0.083^{***}$ \\
+                                     & $(0.020)$      & $(0.021)$     \\
+Sales / TA (accelerator)             & $0.003$        & $0.000$       \\
+                                     & $(0.003)$      & $(0.005)$     \\
+log(Total assets) (size)             & $-0.007^{***}$ & $-0.002$      \\
+                                     & $(0.003)$      & $(0.007)$     \\
+\midrule
+R$^2$                                & $0.072$        & $$            \\
+Adj. R$^2$                           & $0.022$        & $$            \\
+Num. obs.                            & $5237$         & $5619$        \\
+n                                    & $$             & $240$         \\
+T                                    & $$             & $27$          \\
+Num. obs. used                       & $$             & $4890$        \\
+Sargan Test: chisq                   & $$             & $20.705$      \\
+Sargan Test: df                      & $$             & $14.000$      \\
+Sargan Test: p-value                 & $$             & $0.109$       \\
+Wald Test Coefficients: chisq        & $$             & $259.521$     \\
+Wald Test Coefficients: df           & $$             & $7$           \\
+Wald Test Coefficients: p-value      & $$             & $0.000$       \\
+Wald Test Time Dummies: chisq        & $$             & $86.828$      \\
+Wald Test Time Dummies: df           & $$             & $25$          \\
+Wald Test Time Dummies: p-value      & $$             & $0.000$       \\
+\bottomrule
+\multicolumn{3}{l}{\scriptsize{\item $^{***}p<0.01$; $^{**}p<0.05$; $^{*}p<0.1$. FE: two-way within estimator, firm-clustered robust SEs. Difference GMM: two-step Arellano--Bond, Windmeijer (2005) corrected SEs, instruments = lagged levels $t-2$ to $t-4$ (collapsed). All regressors lagged one period; time dummies included but not shown.}}
+\end{tabular}
+\label{tab:fin_investment}
+\end{center}
+\end{table}

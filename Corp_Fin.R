@@ -12,55 +12,55 @@ library(lmtest)
 library(modelsummary)
 library(flextable)
 
-
-#=========================================
-
-# Stage 1. Identifying Sample 
-
-# The firm-level data is pulled from LSEG Worldscope. 
-# This code block removes stocks which were not listed for the entire sample, to plug back into the database.
-# Identifying de-listed stocks in a global sample seems basically impossible.
-
-#==========================================
-
-
-sample <- read.csv("full_screen.csv", header = TRUE)
-prices <- read.csv("screen_price_data.csv", header = TRUE)
-
-#----------------------------------
-# Reducing to Time Consistent Sample 
-#----------------------------------
-
-prices <- prices %>%
-# Note Refinitiv can sometimes export dates as dmy
-  mutate(Date = ymd(Date))
-  mutate(Price.Close = as.numeric(Price.Close)) %>%
-  group_by(Instrument) %>%
-  fill(Price.Close) %>%
-  mutate(Date = floor_date(Date, "month")) %>%
-  distinct(Date, .keep_all = TRUE) %>%
-  ungroup() %>%
-  arrange(Instrument)
-
-prices <- prices %>%
-  na.omit() %>%  
-  group_by(Instrument) %>%
-  mutate(n = n()) %>%
-  ungroup() %>%
-  filter(n == max(n)) %>%
-  select(-n) %>%
-  group_by(Instrument) %>%
-  summarise(n=n())
-
-SAMPLE_REDUCED <- sample %>%
-  filter(Instrument %in% prices$Instrument)
-
-SAMPLE_REDUCED_RICS <- as_tibble(SAMPLE_REDUCED$Instrument)
-
-# These files go back into Worldscope
-
-write.csv(SAMPLE_REDUCED, file = "WP8_food_companies_sample.csv")
-write.csv(SAMPLE_REDUCED_RICS, file = "WP8_RICs.csv")
+# 
+# #=========================================
+# 
+# # Stage 1. Identifying Sample 
+# 
+# # The firm-level data is pulled from LSEG Worldscope. 
+# # This code block removes stocks which were not listed for the entire sample, to plug back into the database.
+# # Identifying de-listed stocks in a global sample seems basically impossible.
+# 
+# #==========================================
+# 
+# 
+# sample <- read.csv("full_screen.csv", header = TRUE)
+# prices <- read.csv("screen_price_data.csv", header = TRUE)
+# 
+# #----------------------------------
+# # Reducing to Time Consistent Sample 
+# #----------------------------------
+# 
+# prices <- prices %>%
+# # Note Refinitiv can sometimes export dates as dmy
+#   mutate(Date = ymd(Date))
+#   mutate(Price.Close = as.numeric(Price.Close)) %>%
+#   group_by(Instrument) %>%
+#   fill(Price.Close) %>%
+#   mutate(Date = floor_date(Date, "month")) %>%
+#   distinct(Date, .keep_all = TRUE) %>%
+#   ungroup() %>%
+#   arrange(Instrument)
+# 
+# prices <- prices %>%
+#   na.omit() %>%  
+#   group_by(Instrument) %>%
+#   mutate(n = n()) %>%
+#   ungroup() %>%
+#   filter(n == max(n)) %>%
+#   select(-n) %>%
+#   group_by(Instrument) %>%
+#   summarise(n=n())
+# 
+# SAMPLE_REDUCED <- sample %>%
+#   filter(Instrument %in% prices$Instrument)
+# 
+# SAMPLE_REDUCED_RICS <- as_tibble(SAMPLE_REDUCED$Instrument)
+# 
+# # These files go back into Worldscope
+# 
+# write.csv(SAMPLE_REDUCED, file = "WP8_food_companies_sample.csv")
+# write.csv(SAMPLE_REDUCED_RICS, file = "WP8_RICs.csv")
 
 #=========================================
 # Stage 2. Data Analysis  
@@ -357,63 +357,33 @@ summary(gmm_diff, robust = TRUE)
 
 # Outputs
 
-gmm_vcov <- vcovHC(gmm_diff)
+fe_ct  <- lmtest::coeftest(fe_model, vcov = fe_vcov)   # clustered FE
+gmm_ex <- extract(gmm_diff)                            # Windmeijer GMM, aligned
 
-models <- list(
-  "Fixed Effects"   = fe_model,
-  "Difference GMM"  = gmm_diff
+# rename + order coefficients; anything not listed (e.g. time dummies) is dropped
+coef_map <- list(
+  "lag(inv, 1)"      = "Lagged investment (I/K)$_{t-1}$",
+  "lag(fa, 1)"       = "Financial assets / TA (crowding-out)",
+  "lag(svo, 1)"      = "Payouts / equity (shareholder-value)",
+  "lag(lev, 1)"      = "Debt / TA (debt-trap)",
+  "lag(roa, 1)"      = "Return on assets (profit rate)",
+  "lag(turnover, 1)" = "Sales / TA (accelerator)",
+  "lag(log_ta, 1)"   = "log(Total assets) (size)"
 )
 
-modelsummary(
-  models,
-  vcov      = list(fe_vcov, gmm_vcov),   # clustered FE; Windmeijer-corrected GMM
-  stars     = c('*' = 0.1, '**' = 0.05, '***' = 0.01),
-  coef_rename = c(
-    "lag(inv, 1)"      = "Lagged investment (I/K)",
-    "lag(fa, 1)"       = "Financial assets / TA  (crowding-out)",
-    "lag(svo, 1)"      = "Payouts / equity  (shareholder-value)",
-    "lag(lev, 1)"      = "Debt / TA  (debt-trap)",
-    "lag(roa, 1)"      = "Return on assets  (profit rate)",
-    "lag(turnover, 1)" = "Sales / TA  (accelerator)",
-    "lag(log_ta, 1)"   = "log(Total assets)  (size)"
-  ),
-  gof_omit  = "Adj|AIC|BIC|Log|RMSE",
-  title     = "Financialisation and fixed capital investment in the agri-food sector",
-  notes     = "FE: two-way within estimator, firm-clustered robust SEs. Difference GMM: two-step Arellano-Bond, Windmeijer (2005) corrected SEs, instruments = lagged levels t-2..t-4. All regressors lagged one period.",
-  output    = "markdown"
-)
-
-screenreg(list("Fixed Effects" = fe_model, "Difference GMM" = gmm_diff),
-          override.se   = list(sqrt(diag(fe_vcov)), sqrt(diag(gmm_vcov))),
-          override.pval = list(...),               # optional
-          custom.gof.rows = list(),                # it already adds Sargan/AR/obs
-          digits = 3)
-
-# To export the same table for the paper, swap the output argument, e.g.:
-#   output = "regression_results.docx"   (needs flextable)
-#   output = "regression_results.tex"    (LaTeX, needs kableExtra)
-
-fe_se  <- sqrt(diag(fe_vcov))
-fe_p   <- 2 * pnorm(-abs(coef(fe_model)  / fe_se))
-
-gmm_se <- sqrt(diag(gmm_vcov))
-gmm_p  <- 2 * pnorm(-abs(coef(gmm_diff) / gmm_se))
-
-screenreg(
-  list("Fixed Effects" = fe_model, "Difference GMM" = gmm_diff),
-  override.se   = list(fe_se,  gmm_se),
-  override.pval = list(fe_p,   gmm_p),
-  digits        = 3
-)
-
-fe_ct <- lmtest::coeftest(fe_model, vcov = fe_vcov)
-
-# GMM: take exactly what texreg extracts (already Windmeijer-corrected)
-gmm_ex <- extract(gmm_diff)     # texreg object; @se and @pvalues are aligned
-
-screenreg(
-  list("Fixed Effects" = fe_model, "Difference GMM" = gmm_diff),
-  override.se   = list(fe_ct[, "Std. Error"], gmm_ex@se),
-  override.pval = list(fe_ct[, "Pr(>|t|)"],   gmm_ex@pvalues),
-  digits        = 3
+texreg(
+  list(fe_model, gmm_diff),
+  override.se        = list(fe_ct[, "Std. Error"], gmm_ex@se),
+  override.pval      = list(fe_ct[, "Pr(>|t|)"],   gmm_ex@pvalues),
+  custom.model.names = c("Fixed Effects", "Difference GMM"),
+  custom.coef.map    = coef_map,
+  stars              = c(0.01, 0.05, 0.1),
+  digits             = 3,
+  caption            = "Financialisation and fixed capital investment in the agri-food sector",
+  caption.above      = TRUE,
+  label              = "tab:fin_investment",
+  booktabs           = TRUE,
+  use.packages       = FALSE,   # booktabs/dcolumn assumed already in your preamble
+  custom.note        = "\\item %stars. FE: two-way within estimator, firm-clustered robust SEs. Difference GMM: two-step Arellano--Bond, Windmeijer (2005) corrected SEs, instruments = lagged levels $t-2$ to $t-4$ (collapsed). All regressors lagged one period; time dummies included but not shown.",
+  file               = "regression_results.tex"
 )
