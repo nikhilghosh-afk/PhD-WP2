@@ -2,97 +2,120 @@
 
 library(tidyverse)
 library(lubridate)
-library(dplyr)
+library(zoo)
+library(DescTools)
+library(texreg)
 library(scales)
-library(ggrepel)
-library(ggplot2)
-library(RColorBrewer)
-library(ggokabeito)
 library(plm)
+library(lmtest)
 library(modelsummary)
+library(flextable)
+library(ggokabeito)
 
-# Stage 1. Cleaning Data
+# 
+# #=========================================
+# 
+# # Stage 1. Identifying Sample 
+# 
+# # The firm-level data is pulled from LSEG Worldscope. 
+# # This code block removes stocks which were not listed for the entire sample, to plug back into the database.
+# # Identifying de-listed stocks in a global sample seems basically impossible.
+# 
+# #==========================================
+# 
+# 
+# sample <- read.csv("full_screen.csv", header = TRUE)
+# prices <- read.csv("screen_price_data.csv", header = TRUE)
+# 
+# #----------------------------------
+# # Reducing to Time Consistent Sample 
+
+# prices <- prices %>%
+# # Note Refinitiv can sometimes export dates as dmy
+#   mutate(Date = ymd(Date))
+#   mutate(Price.Close = as.numeric(Price.Close)) %>%
+#   group_by(Instrument) %>%
+#   fill(Price.Close) %>%
+#   mutate(Date = floor_date(Date, "month")) %>%
+#   distinct(Date, .keep_all = TRUE) %>%
+#   ungroup() %>%
+#   arrange(Instrument)
+# 
+# prices <- prices %>%
+#   na.omit() %>%  
+#   group_by(Instrument) %>%
+#   mutate(n = n()) %>%
+#   ungroup() %>%
+#   filter(n == max(n)) %>%
+#   select(-n) %>%
+#   group_by(Instrument) %>%
+#   summarise(n=n())
+# 
+# SAMPLE_REDUCED <- sample %>%
+#   filter(Instrument %in% prices$Instrument)
+# 
+# SAMPLE_REDUCED_RICS <- as_tibble(SAMPLE_REDUCED$Instrument)
+# 
+# # These files go back into Worldscope
+# 
+# write.csv(SAMPLE_REDUCED, file = "WP8_food_companies_sample.csv")
+# write.csv(SAMPLE_REDUCED_RICS, file = "WP8_RICs.csv")
+
+#=========================================
+# Stage 2. Data Analysis  
+
+# The firm-level data is pulled from LSEG Worldscope. 
+# This performs the descriptive and inferential stats analysis on the sample.
+#==========================================
 
 
-sample <- read.csv("full_screen.csv", header = TRUE)
-prices <- read.csv("screen_price_data.csv", header = TRUE)
-
-
-# Reducing to Time Consistent Sample 
-
-prices <- prices %>%
-# Note Refinitiv can sometimes export dates as dmy
-  mutate(Date = ymd(Date))
-  mutate(Price.Close = as.numeric(Price.Close)) %>%
-  group_by(Instrument) %>%
-  fill(Price.Close) %>%
-  mutate(Date = floor_date(Date, "month")) %>%
-  distinct(Date, .keep_all = TRUE) %>%
-  ungroup() %>%
-  arrange(Instrument)
-
-prices <- prices %>%
-  na.omit() %>%  
-  group_by(Instrument) %>%
-  mutate(n = n()) %>%
-  ungroup() %>%
-  filter(n == max(n)) %>%
-  select(-n) %>%
-  group_by(Instrument) %>%
-  summarise(n=n())
-
-SAMPLE_REDUCED <- sample %>%
-  filter(Instrument %in% prices$Instrument)
-
-SAMPLE_REDUCED_RICS <- as_tibble(SAMPLE_REDUCED$Instrument)
-
-# These files go back into Refinitiv
-
-write.csv(SAMPLE_REDUCED, file = "WP8_food_companies_sample.csv")
-write.csv(SAMPLE_REDUCED_RICS, file = "WP8_RICs.csv")
-
-# Stage 2. Data Analysis
-
+#----------------------------------
 # Reading and cleaning Data
+#----------------------------------
 
 fundamentals <- read.csv("balance_sheet_data.csv", header = TRUE, stringsAsFactors = FALSE)
 
 fundamentals <- fundamentals %>%
-  mutate(Date = ymd(Date)) %>%
-  mutate(Date = floor_date(Date, "year")) %>%
+  mutate(Date = year(Date)) %>%
   arrange(Date) %>%
   select(-X)
 
 fundamentals <- fundamentals %>%
   group_by(Instrument) %>%
-  mutate(across(!Date, ~ifelse(.=="", NA, as.character(.))))%>%
+  mutate(across(!Date, ~ifelse(.=="", NA, as.character(.)))) %>%
   fill(Country.of.Exchange) %>%
   fill(Earnings.Quality.Region) %>%
   fill(GICS.Sub.Industry.Name) %>%
-  mutate(Price.Close = as.numeric(Price.Close)) %>%
-  mutate(Company.Market.Capitalization = as.numeric(Company.Market.Capitalization)) %>%
-  mutate(across(7:17, as.numeric))
+  ungroup() %>%
+  mutate(across(-c(Instrument, Date, Country.of.Exchange, GICS.Sub.Industry.Name, Earnings.Quality.Region), ~as.numeric(.x))) %>%
+  mutate(
+    Common.Stock.Buyback...Net       = coalesce(Common.Stock.Buyback...Net, 0),
+    Short.Term.Debt...Notes.Payable  = coalesce(Short.Term.Debt...Notes.Payable, 0)
+  )
 
-# 2.1 Targeted Data Corrections
+# Targeted Data Corrections
+# Some reporting issues were identified for a few companies, which are screened out below
 
-# SIGMAFA.MX 2005: market cap recorded as ~2,000 instead of ~2 billion (data provider glitch)
+# SIGMAFA.MX 2005
 fundamentals <- fundamentals %>%
   mutate(Company.Market.Capitalization = ifelse(
-    Instrument == "SIGMAFA.MX" & year(Date) == 2005,
+    Instrument == "SIGMAFA.MX" & Date == 2005,
     NA, Company.Market.Capitalization))
 
-# Turkish lira redenomination (Jan 2005, 6 zeros removed):
-# some pre-2005 values recorded in old TL while the rest of the series is in new TL
+# Turkish lira redenomination (Jan 2005, 6 zeros removed)
 fundamentals <- fundamentals %>%
   mutate(
     Total.Assets = ifelse(
-      Instrument %in% c("GUBRF.IS", "KENT.IS") & year(Date) %in% 2000:2003 & Total.Assets > 1e12,
+      Instrument %in% c("GUBRF.IS", "KENT.IS") & Date %in% 2000:2003 & Total.Assets > 1e12,
       NA, Total.Assets),
     Company.Market.Capitalization = ifelse(
-      Instrument %in% c("GUBRF.IS", "KENT.IS", "MGROS.IS") & year(Date) %in% 2003:2004
+      Instrument %in% c("GUBRF.IS", "KENT.IS", "MGROS.IS") & Date %in% 2003:2004
         & Company.Market.Capitalization > 1e10,
       NA, Company.Market.Capitalization))
 
+#----------------------------------
+# Grouping Data by region and segment
+#----------------------------------
 fundamentals <- fundamentals %>%
   # filter(!(GICS.Sub.Industry.Name == "Agricultural & Farm Machinery")) %>%
   # filter(!(GICS.Sub.Industry.Name == "Fertilizers & Agricultural Chemicals")) %>%
@@ -116,6 +139,11 @@ count_sample_segment <- fundamentals %>%
 count_sample_region <- fundamentals %>%
   group_by(Region, Date) %>%
   summarise(n=n(), .groups = "drop")
+
+
+#----------------------------------
+# Descriptive Statistics
+#----------------------------------
 
 # 3 Descriptive Figures
 #
@@ -242,109 +270,41 @@ write.csv(perf_total, "investment_roa_total.csv", row.names = FALSE)
 ggsave("investment_roa_total.png", perf_plot, width = 9, height = 5, dpi = 150)
 
 
+#=========================================
+# Inferential Statistics
+# We estimate a Fixed Effects and a two step Difference GMM
+#=========================================
 
 
-################################################################################
-# 4. INFERENTIAL ANALYSIS: HAS FINANCIALISATION REDUCED FIXED CAPITAL INVESTMENT?
-#
-# Model follows the firm-level financialisation-investment literature:
-#   - Orhangazi (2008, CJE) and Tori & Onaran (2018/2020) for the dynamic
-#     investment (accumulation-rate) equation with an accelerator (sales) and a
-#     profit-rate/internal-funds term;
-#   - Davis (2017, J. Econ. Surveys) and Jibril, Kaltenbrunner & Kesidou (2018)
-#     for the three financialisation channels (crowding-out, shareholder-value,
-#     debt-trap) and the POLS / Fixed-Effects / difference-GMM estimation ladder.
-#
-# Design note: this is a SINGLE sector (agri-food) across MANY countries, so
-# firm fixed effects absorb time-invariant country/firm heterogeneity and a full
-# set of year dummies absorbs common (global) macro shocks.
-#
-# Data note: Refinitiv export does not contain net fixed capital stock (K = net
-# PP&E), operating income, interest paid, or non-operating financial income.
-# The exact Orhangazi/Tori-Onaran I/K accelerator cannot therefore be built
-# verbatim; investment is normalised by total assets (the standard fallback for
-# the accumulation rate) and profitability/demand are proxied by ROA and asset
-# turnover. The three financialisation channels map directly onto Davis (2017).
-################################################################################
+#-------------------------------
+# Build the panel
+#-----------------------------=
 
-library(lmtest)   # coeftest() for robust/clustered inference on the FE model
-
-# ---- 4.1 Build the firm-year panel ------------------------------------------
-# All variables in ratio form so coefficients are comparable across firms and
-# countries. Winsorising (below) tames the extreme balance-sheet outliers that
-# are endemic to firm-level data (Tori & Onaran, 2020, Sec. 4).
-
-winsorise <- function(x, p = 0.01) {
-  q <- quantile(x, probs = c(p, 1 - p), na.rm = TRUE)
-  pmin(pmax(x, q[1]), q[2])
-}
 
 panel_data <- fundamentals %>%
-  # A blank in these two items is structural, not missing: no reported buyback
-  # means the firm repurchased no stock that year, and no reported short-term
-  # debt means it carries none. Code them as 0 (standard Worldscope/Refinitiv
-  # practice) so an otherwise-complete firm-year is not discarded. This alone
-  # roughly doubles the estimation sample. Genuine denominators (total assets,
-  # equity, revenue) are still required below.
   mutate(
-    Common.Stock.Buyback...Net       = coalesce(Common.Stock.Buyback...Net, 0),
-    Short.Term.Debt...Notes.Payable  = coalesce(Short.Term.Debt...Notes.Payable, 0)
-  ) %>%
-  mutate(
-    Year = year(Date),
-
-    # Dependent variable: rate of fixed capital accumulation (I / K, with total
-    # assets proxying the capital stock). This is the analogue of Orhangazi's
-    # I/K and of Jibril's investment-in-intangibles dependent variable.
     inv = Capital.Expenditures...Total / Total.Assets,
-
-    # --- Financialisation channel 1: CROWDING-OUT (Davis 2017; Jibril FA/TA) ---
-    # Financial assets as a share of total assets. Higher => firm tilts its
-    # portfolio towards financial rather than productive assets.
     fa = (Cash...Short.Term.Investments + Loans...Receivables...Total) / Total.Assets,
-
-    # --- Financialisation channel 2: SHAREHOLDER-VALUE (Davis 2017; Jibril) ----
-    # Total payouts (dividends + net buybacks) relative to common equity.
     svo = (Dividends.Paid...Cash...Total...Cash.Flow + Common.Stock.Buyback...Net) /
       Shareholders.Equity...Common,
-
-    # --- Financialisation channel 3: DEBT-TRAP (Jibril FL/TA; Tori-Onaran TD/TA)
-    # Total (short + long term) debt relative to total assets.
     lev = (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) / Total.Assets,
-
-    # --- Control: profit rate / internal funds (Orhangazi (pi-CD)/K proxy) -----
     roa = Net.Income.after.Minority.Interest / Total.Assets,
-
-    # --- Control: accelerator / demand (Orhangazi & Tori-Onaran S/K proxy) -----
     turnover = Revenue.from.Business.Activities...Total / Total.Assets,
-
-    # --- Control: firm size (Jibril log(TA)) ----------------------------------
     log_ta = log(Total.Assets)
   ) %>%
-  select(Instrument, Year, inv, fa, svo, lev, roa, turnover, log_ta) %>%
-  # keep only finite observations (drops firm-years with missing balance-sheet
-  # items or non-positive total assets)
+  select(Instrument, Date, inv, fa, svo, lev, roa, turnover, log_ta) %>%
   filter(if_all(c(inv, fa, svo, lev, roa, turnover, log_ta), is.finite)) %>%
-  # winsorise the continuous variables at the 1st/99th percentiles
-  mutate(across(c(inv, fa, svo, lev, roa, turnover), winsorise))
+  mutate(across(c(inv, fa, svo, lev, roa, turnover),
+                ~ DescTools::Winsorize(.x, val = quantile(.x, probs = c(0.01, 0.99), na.rm = TRUE))))
 
-# Convert to a panel data frame (index = firm, year) for plm / pgmm
-pdata <- pdata.frame(panel_data, index = c("Instrument", "Year"))
+pdata <- pdata.frame(panel_data, index = c("Instrument", "Date"))
 
-# Descriptive statistics of the estimation sample (cf. Jibril et al. Table 3)
 datasummary_skim(panel_data %>% select(inv, fa, svo, lev, roa, turnover, log_ta))
 
 
-# ---- 4.2 Fixed-Effects (within) estimator -----------------------------------
-# Static two-way FE (firm + year), following Jibril et al. (Table 6). Firm
-# effects control for time-invariant country/firm heterogeneity; year dummies
-# absorb common global shocks. All regressors lagged one period (predetermined),
-# as investment responds to the balance sheet with a delay.
-#
-# NB: the lagged dependent variable is deliberately EXCLUDED here. In a short-T
-# dynamic panel the within-transformation makes the lagged dependent correlated
-# with the demeaned error (Nickell 1981 bias) - which is precisely why we also
-# estimate the difference-GMM model in 4.3.
+#------------------------------
+# Two way fixed effects model
+#-------------------------------
 
 fe_model <- plm(
   inv ~ lag(fa, 1) + lag(svo, 1) + lag(lev, 1) +
@@ -354,21 +314,13 @@ fe_model <- plm(
   effect = "twoways"
 )
 
-# Standard errors clustered by firm and robust to heteroskedasticity and within
-# firm serial correlation (Arellano 1987).
 fe_vcov <- vcovHC(fe_model, method = "arellano", type = "sss", cluster = "group")
 coeftest(fe_model, vcov = fe_vcov)
 
+#---------------------------
+# Two step Difference GMM
+#---------------------------
 
-# ---- 4.3 Two-step difference-GMM (Arellano & Bond 1991) ---------------------
-# Dynamic specification adding the lagged dependent variable (investment is a
-# persistent, path-dependent process: Orhangazi 2008; Tori & Onaran 2020).
-#   - transformation = "d"  : first-difference GMM (sweeps out firm effects)
-#   - effect = "twoways"    : includes time dummies for common shocks
-#   - model  = "twosteps"   : efficient two-step estimator
-#   - instruments: lagged LEVELS t-2 to t-4 of all predetermined regressors
-#     (2 <= t <= 4 limits instrument proliferation, as in Jibril et al.)
-#   - summary(robust = TRUE): Windmeijer (2005) finite-sample corrected SEs
 
 gmm_diff <- pgmm(
   inv ~ lag(inv, 1) + lag(fa, 1) + lag(svo, 1) + lag(lev, 1) +
@@ -378,47 +330,42 @@ gmm_diff <- pgmm(
   data           = pdata,
   effect         = "twoways",
   model          = "twosteps",
-  transformation = "d"
+  transformation = "d",
+  collapse = TRUE
 )
 
-# Coefficients with Windmeijer-corrected robust SEs, plus the identifying
-# diagnostics: Sargan/Hansen test of over-identifying restrictions and the
-# Arellano-Bond AR(1)/AR(2) tests for serial correlation in the residuals.
-# Validity requires: AR(1) significant, AR(2) NOT significant, Sargan not
-# rejected.
 summary(gmm_diff, robust = TRUE)
 
 
-# ---- 4.4 Side-by-side results table -----------------------------------------
-# Fixed-effects (clustered SEs) vs. two-step difference-GMM (Windmeijer SEs).
-# For a two-step pgmm model vcovHC() returns the Windmeijer-corrected matrix.
+# Outputs
 
-gmm_vcov <- vcovHC(gmm_diff)
+fe_ct  <- lmtest::coeftest(fe_model, vcov = fe_vcov)   # clustered FE
+gmm_ex <- extract(gmm_diff)                            # Windmeijer GMM, aligned
 
-models <- list(
-  "Fixed Effects"   = fe_model,
-  "Difference GMM"  = gmm_diff
+# rename + order coefficients; anything not listed (e.g. time dummies) is dropped
+coef_map <- list(
+  "lag(inv, 1)"      = "Lagged investment (I/K)$_{t-1}$",
+  "lag(fa, 1)"       = "Financial assets / TA (crowding-out)",
+  "lag(svo, 1)"      = "Payouts / equity (shareholder-value)",
+  "lag(lev, 1)"      = "Debt / TA (debt-trap)",
+  "lag(roa, 1)"      = "Return on assets (profit rate)",
+  "lag(turnover, 1)" = "Sales / TA (accelerator)",
+  "lag(log_ta, 1)"   = "log(Total assets) (size)"
 )
 
-modelsummary(
-  models,
-  vcov      = list(fe_vcov, gmm_vcov),   # clustered FE; Windmeijer-corrected GMM
-  stars     = c('*' = 0.1, '**' = 0.05, '***' = 0.01),
-  coef_rename = c(
-    "lag(inv, 1)"      = "Lagged investment (I/K)",
-    "lag(fa, 1)"       = "Financial assets / TA  (crowding-out)",
-    "lag(svo, 1)"      = "Payouts / equity  (shareholder-value)",
-    "lag(lev, 1)"      = "Debt / TA  (debt-trap)",
-    "lag(roa, 1)"      = "Return on assets  (profit rate)",
-    "lag(turnover, 1)" = "Sales / TA  (accelerator)",
-    "lag(log_ta, 1)"   = "log(Total assets)  (size)"
-  ),
-  gof_omit  = "Adj|AIC|BIC|Log|RMSE",
-  title     = "Financialisation and fixed capital investment in the agri-food sector",
-  notes     = "FE: two-way within estimator, firm-clustered robust SEs. Difference GMM: two-step Arellano-Bond, Windmeijer (2005) corrected SEs, instruments = lagged levels t-2..t-4. All regressors lagged one period.",
-  output    = "markdown"
+texreg(
+  list(fe_model, gmm_diff),
+  override.se        = list(fe_ct[, "Std. Error"], gmm_ex@se),
+  override.pval      = list(fe_ct[, "Pr(>|t|)"],   gmm_ex@pvalues),
+  custom.model.names = c("Fixed Effects", "Difference GMM"),
+  custom.coef.map    = coef_map,
+  stars              = c(0.01, 0.05, 0.1),
+  digits             = 3,
+  caption            = "Financialisation and fixed capital investment in the agri-food sector",
+  caption.above      = TRUE,
+  label              = "tab:fin_investment",
+  booktabs           = TRUE,
+  use.packages       = FALSE,   # booktabs/dcolumn assumed already in your preamble
+  custom.note        = "\\item %stars. FE: two-way within estimator, firm-clustered robust SEs. Difference GMM: two-step Arellano--Bond, Windmeijer (2005) corrected SEs, instruments = lagged levels $t-2$ to $t-4$ (collapsed). All regressors lagged one period; time dummies included but not shown.",
+  file               = "regression_results.tex"
 )
-
-# To export the same table for the paper, swap the output argument, e.g.:
-#   output = "regression_results.docx"   (needs flextable)
-#   output = "regression_results.tex"    (LaTeX, needs kableExtra)
