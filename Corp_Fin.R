@@ -204,6 +204,51 @@ write.csv(metrics_Segment$data, "metrics_Segment.csv", row.names = FALSE)
 ggsave("metrics_Segment.png", metrics_Segment$plot, width = 11, height = 7, dpi = 150)
 
 
+# Headline figure: the five indicators (overall "Total" only) each rebased to
+# 100 in the base year, on one common indexed scale. This puts the paper's
+# thesis - financialisation channels rising while investment falls - in a single
+# panel, without a dual axis. The "Total" series is identical across groupings,
+# so it is taken from the Region output.
+
+short_labels <- c(
+  "Fixed Capital Expenditure (% of Market Cap)"         = "Investment",
+  "Annual Return on Total Assets (%)"                   = "Return on assets",
+  "Financial Assets / Total Assets (%)"                 = "Financial assets",
+  "Shareholder Payouts / Total Common Equity (%)"       = "Payouts / equity",
+  "Total Short and Long Term Debt to Total Revenue (%)" = "Debt / revenue"
+)
+
+index_base <- metrics_Region$data %>%
+  filter(grp == "Total", is.finite(a)) %>%
+  group_by(metric) %>%
+  arrange(Date) %>%
+  mutate(index = 100 * a / first(a),                 # rebase each series to base year
+         label = short_labels[as.character(metric)]) %>%
+  ungroup()
+
+indexed_plot <- ggplot(index_base, aes(Date, index, colour = metric)) +
+  geom_hline(yintercept = 100, linetype = "dashed", colour = "grey70") +
+  geom_line(linewidth = 0.8) +
+  # direct labels at the end of each line (short names) instead of a legend
+  ggrepel::geom_text_repel(
+    data = index_base %>% group_by(metric) %>% slice_max(Date, n = 1) %>% ungroup(),
+    aes(label = label), hjust = 0, direction = "y", size = 3.2,
+    nudge_x = 250, segment.colour = NA, min.segment.length = Inf) +
+  scale_x_date(date_breaks = "5 years", date_labels = "%Y",
+               expand = expansion(mult = c(0.02, 0.28))) +
+  scale_colour_manual(
+    values = c("#000000", "#E69F00", "#56B4E9", "#009E73", "#D55E00")) +
+  labs(x = NULL, y = "Index (base year = 100)",
+       title = "Financialisation and fixed investment in agri-food, indexed to base year") +
+  guides(colour = "none") +                          # labels replace the legend
+  theme_minimal(base_size = 11) +
+  theme(panel.grid.minor = element_blank(),
+        plot.title = element_text(face = "bold", size = 11))
+
+write.csv(index_base, "metrics_indexed.csv", row.names = FALSE)
+ggsave("metrics_indexed.png", indexed_plot, width = 10, height = 6, dpi = 150)
+
+
 
 
 ################################################################################
