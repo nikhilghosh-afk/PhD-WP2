@@ -117,149 +117,129 @@ count_sample_region <- fundamentals %>%
   group_by(Region, Date) %>%
   summarise(n=n(), .groups = "drop")
 
-# 3 Function to Calculate and Visualise Key Metrics
+# 3 Descriptive Figures
 #
-# calculate_metrics() takes any grouping variable (Region, Segment, ...) plus a
-# set of NAMED metric expressions, and returns one faceted figure with a panel
-# per metric. Each panel shows the group means plus an overall "Total" line, so
-# the five financialisation indicators are read as one comparable small-multiple
-# rather than as five separate look-alike charts.
+# Two outputs:
+#   (1) financialisation_panel.png - a 3 x 2 grid: the three financialisation
+#       indicators (rows) split by the two grouping variables, Region and
+#       Segment (columns); each panel shows the group means plus a black "Total"
+#       reference line.
+#   (2) investment_roa_total.png - fixed capital investment and return on assets
+#       for the whole sample only (no grouping), as two lines on one panel.
 #
-#   ...          named metric expressions; the name becomes the facet (panel) title
-#   group_var    the grouping variable, unquoted (e.g. Region or Segment)
-#   ncol         number of facet columns
+# Both share the winsorising and tidy-summary helpers below.
 
-calculate_metrics <- function(data, group_var, ..., ncol = 2, winsor = 0.01) {
+# Cap a vector at its winsor / (1 - winsor) quantiles (pooled across firm-years),
+# removing the extreme ratios produced by near-zero / negative denominators.
+# Set winsor = NA to disable.
+cap_winsor <- function(x, winsor = 0.01) {
+  if (is.na(winsor) || winsor <= 0) return(x)
+  qs <- quantile(x, c(winsor, 1 - winsor), na.rm = TRUE)
+  pmin(pmax(x, qs[1]), qs[2])
+}
 
-  metric_quos <- enquos(..., .named = TRUE)      # names -> facet titles
-  group_col   <- as.character(ensym(group_var))
-
-  # Cap a metric at its winsor / (1 - winsor) quantiles, pooled across all
-  # firm-years, before averaging. This removes the extreme ratios produced by
-  # near-zero or negative denominators - e.g. payouts / equity blows up to
-  # thousands of percent for firms with negative book equity after large
-  # buybacks (McDonald's, Starbucks, Yum, ...). Set winsor = NA to disable.
-  cap <- function(x) {
-    if (is.na(winsor) || winsor <= 0) return(x)
-    qs <- quantile(x, c(winsor, 1 - winsor), na.rm = TRUE)
-    pmin(pmax(x, qs[1]), qs[2])
-  }
-
-  # For one metric: winsorise the firm-year values, then take the overall
-  # "Total" mean by year and the group means by year, and stack them.
+# Tidy yearly means for a set of named metric expressions under one grouping.
+# Returns long data: Date, grp, metric, a, group_type. With totals = TRUE an
+# overall "Total" series (all firms) is stacked alongside the group means.
+summarise_metrics <- function(data, group_var, metrics, group_label,
+                              winsor = 0.01, totals = TRUE) {
   build_one <- function(q, label) {
     d <- data %>%
       transmute(Date, grp = {{ group_var }}, value = !!q) %>%
       filter(is.finite(value)) %>%
-      mutate(value = cap(value))
-    total_df   <- d %>% group_by(Date) %>%
-      summarise(a = mean(value), .groups = "drop") %>% mutate(grp = "Total")
-    grouped_df <- d %>% group_by(grp, Date) %>%
+      mutate(value = cap_winsor(value, winsor))
+    grouped <- d %>% group_by(grp, Date) %>%
       summarise(a = mean(value), .groups = "drop")
-    bind_rows(total_df, grouped_df) %>% mutate(metric = label)
+    if (totals) {
+      total <- d %>% group_by(Date) %>%
+        summarise(a = mean(value), .groups = "drop") %>% mutate(grp = "Total")
+      grouped <- bind_rows(total, grouped)
+    }
+    grouped %>% mutate(metric = label)
   }
-
-  combined_df <- bind_rows(imap(metric_quos, build_one)) %>%
-    # keep panels in the order the metrics were supplied
-    mutate(metric = factor(metric, levels = names(metric_quos)))
-
-  # Colours: black reference line for "Total"; Okabe-Ito (colour-blind safe) for
-  # the groups, assigned in a fixed order. Total is drawn slightly heavier.
-  # These orders take strong Okabe-Ito hues (skipping yellow, too light on white,
-  # and grey), reserving black for the Total reference line.
-  other_levels  <- setdiff(sort(unique(combined_df$grp)), "Total")
-  okabe_ito     <- unname(palette_okabe_ito(order = c(1, 2, 3, 5, 6, 7)))
-  colour_values <- setNames(c("black", okabe_ito[seq_along(other_levels)]),
-                            c("Total", other_levels))
-  width_values  <- setNames(c(0.9, rep(0.5, length(other_levels))),
-                            c("Total", other_levels))
-
-  plot <- ggplot(combined_df,
-                 aes(x = Date, y = a, colour = grp, linewidth = grp)) +
-    geom_line() +
-    facet_wrap(~ metric, scales = "free_y", ncol = ncol) +
-    scale_x_date(date_breaks = "5 years", date_labels = "%Y") +
-    scale_y_continuous(breaks = scales::breaks_pretty(n = 6)) +
-    scale_colour_manual(values = colour_values) +
-    scale_linewidth_manual(values = width_values, guide = "none") +
-    labs(x = NULL, y = NULL, colour = group_col) +
-    theme_minimal(base_size = 11) +
-    theme(legend.position  = "bottom",
-          panel.grid.minor = element_blank(),
-          strip.text       = element_text(face = "bold"))
-
-  return(list(data = combined_df, plot = plot))
+  bind_rows(imap(metrics, build_one)) %>%
+    mutate(group_type = group_label,
+           metric = factor(metric, levels = names(metrics)))
 }
 
-# Five key metrics, faceted into a single figure per grouping. Swap the first
-# argument (Region <-> Segment) to change the grouping; the metrics are identical.
-
-metric_exprs <- rlang::exprs(
-  "Fixed Capital Expenditure (% of Market Cap)"      =
-    Capital.Expenditures...Total * 100 / Company.Market.Capitalization,
-  "Annual Return on Total Assets (%)"                =
-    Net.Income.after.Minority.Interest * 100 / Total.Assets,
-  "Financial Assets / Total Assets (%)"              =
+# --- Metric definitions -------------------------------------------------------
+# Three financialisation indicators for the grouped panel...
+fin_metrics <- rlang::exprs(
+  "Financial Assets / Total Assets (%)" =
     (Cash...Short.Term.Investments + Loans...Receivables...Total) * 100 / Total.Assets,
-  "Shareholder Payouts / Total Common Equity (%)"    =
+  "Shareholder Payouts / Common Equity (%)" =
     (Dividends.Paid...Cash...Total...Cash.Flow + Common.Stock.Buyback...Net) * 100 /
       Shareholders.Equity...Common,
-  "Total Short and Long Term Debt to Total Revenue (%)" =
+  "Debt / Total Revenue (%)" =
     (Debt...Long.Term...Total + Short.Term.Debt...Notes.Payable) * 100 /
       Revenue.from.Business.Activities...Total
 )
-
-metrics_Region  <- calculate_metrics(fundamentals, Region,  !!!metric_exprs)
-metrics_Segment <- calculate_metrics(fundamentals, Segment, !!!metric_exprs)
-
-write.csv(metrics_Region$data,  "metrics_Region.csv",  row.names = FALSE)
-ggsave("metrics_Region.png",  metrics_Region$plot,  width = 11, height = 7, dpi = 150)
-write.csv(metrics_Segment$data, "metrics_Segment.csv", row.names = FALSE)
-ggsave("metrics_Segment.png", metrics_Segment$plot, width = 11, height = 7, dpi = 150)
-
-
-# Headline figure: the five indicators (overall "Total" only) each rebased to
-# 100 in the base year, on one common indexed scale. This puts the paper's
-# thesis - financialisation channels rising while investment falls - in a single
-# panel, without a dual axis. The "Total" series is identical across groupings,
-# so it is taken from the Region output.
-
-short_labels <- c(
-  "Fixed Capital Expenditure (% of Market Cap)"         = "Investment",
-  "Annual Return on Total Assets (%)"                   = "Return on assets",
-  "Financial Assets / Total Assets (%)"                 = "Financial assets",
-  "Shareholder Payouts / Total Common Equity (%)"       = "Payouts / equity",
-  "Total Short and Long Term Debt to Total Revenue (%)" = "Debt / revenue"
+# ...and two performance indicators for the total-sample figure.
+perf_metrics <- rlang::exprs(
+  "Fixed Capital Expenditure (% of Market Cap)" =
+    Capital.Expenditures...Total * 100 / Company.Market.Capitalization,
+  "Return on Total Assets (%)" =
+    Net.Income.after.Minority.Interest * 100 / Total.Assets
 )
 
-index_base <- metrics_Region$data %>%
-  filter(grp == "Total", is.finite(a)) %>%
-  group_by(metric) %>%
-  arrange(Date) %>%
-  mutate(index = 100 * a / first(a),                 # rebase each series to base year
-         label = short_labels[as.character(metric)]) %>%
-  ungroup()
+# --- (1) Six-panel financialisation grid: 3 metrics (rows) x 2 groupings (cols)
+fin_panel <- bind_rows(
+  summarise_metrics(fundamentals, Region,  fin_metrics, "By Region"),
+  summarise_metrics(fundamentals, Segment, fin_metrics, "By Segment")
+)
 
-indexed_plot <- ggplot(index_base, aes(Date, index, colour = metric)) +
-  geom_hline(yintercept = 100, linetype = "dashed", colour = "grey70") +
-  geom_line(linewidth = 0.8) +
-  # direct labels at the end of each line (short names) instead of a legend
-  ggrepel::geom_text_repel(
-    data = index_base %>% group_by(metric) %>% slice_max(Date, n = 1) %>% ungroup(),
-    aes(label = label), hjust = 0, direction = "y", size = 3.2,
-    nudge_x = 250, segment.colour = NA, min.segment.length = Inf) +
-  scale_x_date(date_breaks = "5 years", date_labels = "%Y",
-               expand = expansion(mult = c(0.02, 0.28))) +
-  scale_colour_okabe_ito(order = c(9, 1, 2, 3, 6)) +   # black, orange, sky, green, vermillion
-  labs(x = NULL, y = "Index (base year = 100)",
-       title = "Financialisation and fixed investment in agri-food, indexed to base year") +
-  guides(colour = "none") +                          # labels replace the legend
+# Colours: black Total line; distinct Okabe-Ito hues for every group across both
+# groupings (4 regions + 3 segments), skipping the pale yellow.
+grp_levels    <- setdiff(sort(unique(fin_panel$grp)), "Total")
+okabe_ito     <- unname(palette_okabe_ito(order = c(1, 2, 3, 5, 6, 7, 8)))
+colour_values <- setNames(c("black", okabe_ito[seq_along(grp_levels)]),
+                          c("Total", grp_levels))
+width_values  <- setNames(c(0.9, rep(0.5, length(grp_levels))),
+                          c("Total", grp_levels))
+
+fin_plot <- ggplot(fin_panel, aes(Date, a, colour = grp, linewidth = grp)) +
+  geom_line() +
+  facet_grid(metric ~ group_type, scales = "free_y", switch = "y",
+             labeller = labeller(metric = label_wrap_gen(18))) +
+  scale_x_date(date_breaks = "5 years", date_labels = "%Y") +
+  scale_colour_manual(values = colour_values) +
+  scale_linewidth_manual(values = width_values, guide = "none") +
+  labs(x = NULL, y = NULL, colour = NULL) +
   theme_minimal(base_size = 11) +
-  theme(panel.grid.minor = element_blank(),
-        plot.title = element_text(face = "bold", size = 11))
+  theme(legend.position   = "bottom",
+        panel.grid.minor  = element_blank(),
+        strip.placement   = "outside",
+        strip.text        = element_text(face = "bold"),
+        strip.text.y.left = element_text(angle = 0))
 
-write.csv(index_base, "metrics_indexed.csv", row.names = FALSE)
-ggsave("metrics_indexed.png", indexed_plot, width = 10, height = 6, dpi = 150)
+write.csv(fin_panel, "financialisation_panel.csv", row.names = FALSE)
+ggsave("financialisation_panel.png", fin_plot, width = 10, height = 8, dpi = 150)
+
+# --- (2) Investment and return on assets, total sample only -------------------
+perf_total <- bind_rows(imap(perf_metrics, function(q, label) {
+  fundamentals %>%
+    transmute(Date, value = !!q) %>%
+    filter(is.finite(value)) %>%
+    mutate(value = cap_winsor(value)) %>%
+    group_by(Date) %>%
+    summarise(a = mean(value), .groups = "drop") %>%
+    mutate(metric = label)
+})) %>%
+  mutate(metric = factor(metric, levels = names(perf_metrics)))
+
+perf_plot <- ggplot(perf_total, aes(Date, a, colour = metric)) +
+  geom_line(linewidth = 0.8) +
+  scale_x_date(date_breaks = "5 years", date_labels = "%Y") +
+  scale_colour_okabe_ito() +
+  labs(x = NULL, y = "%", colour = NULL,
+       title = "Investment and profitability, total sample") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position  = "bottom",
+        panel.grid.minor = element_blank(),
+        plot.title       = element_text(face = "bold", size = 11))
+
+write.csv(perf_total, "investment_roa_total.csv", row.names = FALSE)
+ggsave("investment_roa_total.png", perf_plot, width = 9, height = 5, dpi = 150)
 
 
 
